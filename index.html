@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BaR - Dashboard de Aliança | Kingshot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                            950: '#451a03',
+                        },
+                        military: {
+                            800: '#1e251c',
+                            900: '#141912',
+                            950: '#0b0e0a',
+                        },
+                        beer: {
+                            dark: '#1a0f05',
+                            light: '#da8a13',
+                        }
+                    },
+                    fontFamily: {
+                        accent: ['Cinzel', 'serif'],
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .wood-pattern {
+            background-color: #120c06;
+            background-image: radial-gradient(rgba(218, 138, 19, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #111;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #b45309;
+            border-radius: 3px;
+        }
+        .gold-border-glow {
+            box-shadow: 0 0 10px rgba(217, 119, 6, 0.2);
+        }
+    </style>
+</head>
+<body class="wood-pattern text-slate-100 min-h-screen font-sans selection:bg-gold-600 selection:text-white">
+
+    <header class="relative border-b-2 border-gold-800 bg-black/80 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-military-950 via-beer-dark/90 to-military-950 opacity-95"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 py-6 md:py-8 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-5">
+                <div class="relative w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-gold-600 overflow-hidden flex-shrink-0 bg-military-900 flex items-center justify-center shadow-[0_0_20px_rgba(217,119,6,0.4)]">
+                    <div class="text-center">
+                        <i class="fa-solid fa-beer-mug-empty text-3xl md:text-4xl text-gold-400 animate-pulse"></i>
+                        <span class="block font-accent text-xs font-black tracking-widest text-gold-200 mt-1">BaR</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 text-[10px] bg-red-700 text-white font-bold rounded uppercase tracking-wider">Aliança QG</span>
+                        <span class="text-gold-400 font-accent text-sm tracking-widest">KINGSHOT STRATEGY</span>
+                    </div>
+                    <h1 class="text-3xl md:text-5xl font-accent font-black tracking-wider text-gold-100 uppercase mt-1">
+                        Corporação <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold-400 via-amber-300 to-gold-600">BaR</span>
+                    </h1>
+                    <p class="text-xs md:text-sm text-slate-400 mt-1 font-mono">
+                        <i class="fa-solid fa-shield-halved text-gold-500 mr-1"></i> Dashboard Estratégico de Auditoria & Fusões
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-black/60 border border-gold-900/50 p-3 rounded-lg w-full md:w-auto">
+                <div class="text-left hidden sm:block">
+                    <p class="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Controle de Acesso</p>
+                    <div id="status-permissao" class="flex items-center gap-1.5 text-xs font-semibold text-amber-500 mt-0.5">
+                        <i class="fa-solid fa-lock"></i> Modo Leitura
+                    </div>
+                </div>
+                <div class="h-8 w-px bg-gold-900/40 hidden sm:block"></div>
+                <div class="flex items-center justify-between sm:justify-start gap-4">
+                    <div>
+                        <span class="block text-[10px] text-slate-400 uppercase tracking-widest">Membros</span>
+                        <span id="header-total-membros" class="text-xl font-black font-accent text-gold-500">0</span>
+                    </div>
+                    <button id="btn-toggle-admin" onclick="abrirModalSenha()" class="bg-gradient-to-r from-gold-600 to-amber-700 hover:from-gold-500 hover:to-amber-600 text-black text-xs font-bold py-2 px-3 rounded-md flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-key"></i> <span>Ativar Edição</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <div class="flex flex-wrap gap-2 mb-8 border-b border-gold-950 pb-4">
+            <button onclick="switchTab('informacoes-gerais')" id="btn-informacoes-gerais" class="tab-btn px-5 py-3 rounded-md font-semibold text-sm transition-all duration-300 flex items-center gap-2 bg-gold-700 text-white shadow-lg">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+                <span>Informações Gerais</span>
+            </button>
+            <button onclick="switchTab('base-detalhada')" id="btn-base-detalhada" class="tab-btn px-5 py-3 rounded-md font-semibold text-sm transition-all duration-300 flex items-center gap-2 bg-military-900 text-slate-300 hover:bg-military-800 hover:text-white">
+                <i class="fa-solid fa-database text-lg"></i>
+                <span>Base Detalhada</span>
+            </button>
+            <button onclick="switchTab('controle-atividade')" id="btn-controle-atividade" class="tab-btn px-5 py-3 rounded-md font-semibold text-sm transition-all duration-300 flex items-center gap-2 bg-military-900 text-slate-300 hover:bg-military-800 hover:text-white">
+                <i class="fa-solid fa-users-gear text-lg"></i>
+                <span>Controle de Atividade Individual</span>
+            </button>
+            <button onclick="switchTab('controle-eventos')" id="btn-controle-eventos" class="tab-btn px-5 py-3 rounded-md font-semibold text-sm transition-all duration-300 flex items-center gap-2 bg-military-900 text-slate-300 hover:bg-military-800 hover:text-white">
+                <i class="fa-solid fa-calendar-check text-lg"></i>
+                <span>Controle de Eventos</span>
+            </button>
+            <button onclick="switchTab('ferramentas-dados')" id="btn-ferramentas-dados" class="tab-btn px-5 py-3 rounded-md font-semibold text-sm transition-all duration-300 flex items-center gap-2 bg-military-900 text-slate-300 hover:bg-military-800 hover:text-white ml-auto">
+                <i class="fa-solid fa-file-import text-lg"></i>
+                <span>Ajustes & Backup</span>
+            </button>
+        </div>
+
+        <div id="toast-msg" class="hidden fixed bottom-5 right-5 z-50 bg-military-900 border-2 border-gold-500 text-gold-100 p-4 rounded-xl shadow-2xl flex items-center gap-3">
+            <i class="fa-solid fa-circle-info text-gold-500 text-xl"></i>
+            <div>
+                <p id="toast-text" class="text-sm font-semibold">Alteração efetuada com sucesso!</p>
+            </div>
+        </div>
+
+
+        <section id="tab-informacoes-gerais" class="space-y-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                
+                <div class="bg-gradient-to-br from-military-900 to-black border border-gold-900/30 p-5 rounded-xl relative overflow-hidden group hover:border-gold-500/50 transition-all">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 text-gold-500 text-7xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Média de Poder</span>
+                    <span id="metric-media-poder" class="text-3xl font-black text-white mt-1 block font-mono">0</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Média global de todos os registros</span>
+                </div>
+
+                <div class="bg-gradient-to-br from-military-900 to-black border border-gold-900/30 p-5 rounded-xl relative overflow-hidden group hover:border-gold-500/50 transition-all">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 text-gold-500 text-7xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Doação Semanal Média</span>
+                    <span id="metric-media-doacao" class="text-3xl font-black text-gold-400 mt-1 block font-mono">0</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Média de contribuição na aliança</span>
+                </div>
+
+                <div class="bg-gradient-to-br from-military-900 to-black border-2 border-red-900/40 p-5 rounded-xl relative overflow-hidden group hover:border-red-500/50 transition-all">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 text-red-500 text-7xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-scissors"></i>
+                    </div>
+                    <span class="text-xs text-red-400 uppercase font-semibold tracking-wider block flex items-center gap-1">
+                        Nota de Corte <span class="text-[9px] bg-red-950 text-red-400 border border-red-900 px-1 rounded">70%</span>
+                    </span>
+                    <span id="metric-nota-corte" class="text-3xl font-black text-red-400 mt-1 block font-mono">0</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Poder mínimo sugerido para recrutamento</span>
+                </div>
+
+                <div class="bg-gradient-to-br from-military-900 to-black border border-gold-900/30 p-5 rounded-xl relative overflow-hidden group hover:border-gold-500/50 transition-all">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 text-gold-500 text-7xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Meta de Entrada</span>
+                    <span id="metric-cumprem-corte" class="text-3xl font-black text-green-400 mt-1 block font-mono">0%</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Dos membros ativos cumprem a Nota de Corte</span>
+                </div>
+
+                <div class="bg-gradient-to-br from-military-900 to-black border border-gold-900/30 p-5 rounded-xl relative overflow-hidden group hover:border-gold-500/50 transition-all">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 text-gold-500 text-7xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Membros Ativos (ON)</span>
+                    <span id="metric-ativos-on" class="text-3xl font-black text-blue-400 mt-1 block font-mono">0 / 0</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Jogadores ativos atualmente no quadro</span>
+                </div>
+            </div>
+
+            <div class="bg-black/40 border border-gold-950 p-6 rounded-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-accent font-black text-gold-400 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie"></i> Distribuição por Quadrantes de Desempenho
+                        </h2>
+                        <p class="text-xs text-slate-400">Classificação tática baseada em Poder e Doação relativos à média atual.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 text-[10px] bg-military-950 p-2 rounded border border-gold-900/20">
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Alta Perf.</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Potencial Cresc.</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Baixa Doação</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Baixa Atividade</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <div class="bg-emerald-950/10 border border-emerald-500/20 rounded-xl p-5 hover:bg-emerald-950/20 transition-all">
+                        <div class="flex items-center justify-between mb-3 border-b border-emerald-500/20 pb-2">
+                            <span class="font-accent text-sm font-bold text-emerald-400 tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-crown"></i> 1. Alta Performance
+                            </span>
+                            <span id="quad-alta-count" class="bg-emerald-500 text-black text-xs font-black px-2.5 py-0.5 rounded-full">0</span>
+                        </div>
+                        <p class="text-[11px] text-emerald-300/80 mb-4 font-mono">Regra: Poder ≥ média AND Doação ≥ média</p>
+                        <div id="list-alta-performance" class="space-y-2 max-h-[160px] overflow-y-auto custom-scrollbar pr-1 text-xs">
+                            <p class="text-slate-500 italic">Nenhum jogador classificado.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-950/10 border border-blue-500/20 rounded-xl p-5 hover:bg-blue-950/20 transition-all">
+                        <div class="flex items-center justify-between mb-3 border-b border-blue-500/20 pb-2">
+                            <span class="font-accent text-sm font-bold text-blue-400 tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-arrow-trend-up"></i> 2. Potencial de Crescimento
+                            </span>
+                            <span id="quad-potencial-count" class="bg-blue-500 text-white text-xs font-black px-2.5 py-0.5 rounded-full">0</span>
+                        </div>
+                        <p class="text-[11px] text-blue-300/80 mb-4 font-mono">Regra: Poder &lt; média AND Doação ≥ média</p>
+                        <div id="list-potencial-crescimento" class="space-y-2 max-h-[160px] overflow-y-auto custom-scrollbar pr-1 text-xs">
+                            <p class="text-slate-500 italic">Nenhum jogador classificado.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-950/10 border border-amber-500/20 rounded-xl p-5 hover:bg-amber-950/20 transition-all">
+                        <div class="flex items-center justify-between mb-3 border-b border-amber-500/20 pb-2">
+                            <span class="font-accent text-sm font-bold text-amber-400 tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation"></i> 3. Baixa Doação
+                            </span>
+                            <span id="quad-doacao-count" class="bg-amber-500 text-black text-xs font-black px-2.5 py-0.5 rounded-full">0</span>
+                        </div>
+                        <p class="text-[11px] text-amber-300/80 mb-4 font-mono">Regra: Poder ≥ Média AND Doação &lt; Média</p>
+                        <div id="list-baixa-doacao" class="space-y-2 max-h-[160px] overflow-y-auto custom-scrollbar pr-1 text-xs">
+                            <p class="text-slate-500 italic">Nenhum jogador classificado.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-rose-950/10 border border-rose-500/20 rounded-xl p-5 hover:bg-rose-950/20 transition-all">
+                        <div class="flex items-center justify-between mb-3 border-b border-rose-500/20 pb-2">
+                            <span class="font-accent text-sm font-bold text-rose-400 tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-skull-crossbones"></i> 4. Baixa Atividade
+                            </span>
+                            <span id="quad-atividade-count" class="bg-rose-500 text-white text-xs font-black px-2.5 py-0.5 rounded-full">0</span>
+                        </div>
+                        <p class="text-[11px] text-rose-300/80 mb-4 font-mono">Regra: Poder &lt; Média AND Doação &lt; Média</p>
+                        <div id="list-baixa-atividade" class="space-y-2 max-h-[160px] overflow-y-auto custom-scrollbar pr-1 text-xs">
+                            <p class="text-slate-500 italic">Nenhum jogador classificado.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-military-900 to-black border border-gold-950 p-6 rounded-xl lg:col-span-2">
+                    <h3 class="text-lg font-accent font-bold text-gold-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-users-viewfinder"></i> Relatório de Decisão Estratégica & Auditoria
+                    </h3>
+                    <div class="space-y-4 text-sm text-slate-300">
+                        <div class="p-3 bg-black/50 border border-gold-900/20 rounded-lg">
+                            <strong class="text-gold-200 block text-xs uppercase mb-1">Cenário de Fusão</strong>
+                            <p class="text-xs">
+                                Ao negociar fusões de alianças, utilize a <strong class="text-red-400 font-mono">Nota de Corte (<span class="corte-span">0</span>)</strong> como filtro absoluto. Jogadores abaixo deste nível de poder enfraquecerão as frentes de batalha coletivas do Kingshot.
+                            </p>
+                        </div>
+                        <div class="p-3 bg-black/50 border border-gold-900/20 rounded-lg">
+                            <strong class="text-gold-200 block text-xs uppercase mb-1">Análise de Descarte / Limpeza</strong>
+                            <p class="text-xs">
+                                Membros classificados no <strong class="text-rose-400">Quadrante 4 (Baixa Atividade)</strong> e que apresentam tempo offline superior a 3 dias devem ser priorizados para substituição imediata, visando abrir espaço para os recrutamentos.
+                            </p>
+                        </div>
+                        <div class="p-3 bg-black/50 border border-gold-900/20 rounded-lg">
+                            <strong class="text-gold-200 block text-xs uppercase mb-1">Gargalo de Doações</strong>
+                            <p class="text-xs">
+                                Membros no <strong class="text-amber-400">Quadrante 3 (Baixa Doação)</strong> têm o poder militar necessário para pertencer à aliança, mas estão usufruindo dos bônus tecnológicos coletivos sem retribuição proporcional. Recomenda-se advertência direta por meio do chat corporativo.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-military-900 to-black border border-gold-950 p-6 rounded-xl">
+                    <h3 class="text-lg font-accent font-bold text-gold-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-user-clock text-red-400"></i> Alerta de Inatividade
+                    </h3>
+                    <div class="space-y-3">
+                        <p class="text-xs text-slate-400 mb-2">Jogadores ativos (ON) que estão com tempo offline detectado:</p>
+                        <div id="lista-inativos" class="space-y-2 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
+                            <p class="text-slate-500 italic text-xs">Nenhum jogador inativo detectado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-base-detalhada" class="hidden space-y-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-military-900/40 p-4 border border-gold-950 rounded-xl">
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                        <input type="text" id="db-search" oninput="renderDatabaseTable()" placeholder="Buscar player..." class="w-full bg-black/60 border border-gold-900/40 rounded-lg py-2 pl-9 pr-4 text-xs text-slate-200 focus:outline-none focus:border-gold-500">
+                    </div>
+                    <select id="db-filter-status" onchange="renderDatabaseTable()" class="bg-black/60 border border-gold-900/40 rounded-lg py-2 px-3 text-xs text-slate-200 focus:outline-none focus:border-gold-500">
+                        <option value="todos">Todos os Status</option>
+                        <option value="on">Ativos Atuais (ON)</option>
+                        <option value="off">Membros Anteriores (OFF)</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                    <button id="btn-novo-registro" onclick="toggleFormModal(true)" class="bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-500 hover:to-gold-600 text-black font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-2 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-plus-circle"></i> Novo Registro de Coleta
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-black/60 border border-gold-950 rounded-xl overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs min-w-[1000px]">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-military-900 via-beer-dark to-military-900 text-gold-400 font-accent uppercase tracking-wider border-b border-gold-950">
+                                <th class="p-4 text-center">Ações</th>
+                                <th class="p-4">Data Coleta</th>
+                                <th class="p-4">Nome</th>
+                                <th class="p-4">Rank</th>
+                                <th class="p-4 text-right">Poder</th>
+                                <th class="p-4 text-center">Nível Cid.</th>
+                                <th class="p-4 text-center">Offline (Dias)</th>
+                                <th class="p-4 text-right">Contrib. Semanal</th>
+                                <th class="p-4 text-center">Quadrante</th>
+                                <th class="p-4">Admissão</th>
+                                <th class="p-4">Demissão / Última Coleta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="db-table-body" class="divide-y divide-gold-950/20">
+                            </tbody>
+                    </table>
+                </div>
+                <div class="bg-military-950/50 p-4 border-t border-gold-950 flex items-center justify-between text-xs text-slate-400">
+                    <div id="db-table-info">Mostrando 0 registros de 0</div>
+                    <div class="text-[10px] text-slate-500 italic">Dica: Adicione registros repetidos de um mesmo player com datas diferentes para acumular o histórico dele!</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-controle-atividade" class="hidden space-y-6">
+            <div class="bg-military-900/30 border border-gold-950 p-5 rounded-xl">
+                <h2 class="text-xl font-accent font-black text-gold-400 uppercase tracking-wider mb-2">
+                    <i class="fa-solid fa-address-book"></i> Ficha Individual Cumulativa dos Combatentes
+                </h2>
+                <p class="text-xs text-slate-400 mb-4">
+                    Este painel varre todos os históricos de coletas cadastrados. Ele agrupa as aparições de cada player, computando quantas vezes ele esteve em cada quadrante, indicando seu status atual com base na coleta mais recente.
+                </p>
+
+                <div class="bg-black/60 border border-gold-950 rounded-xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs min-w-[800px]">
+                            <thead>
+                                <tr class="bg-military-900 text-gold-400 font-accent uppercase tracking-wider border-b border-gold-950">
+                                    <th class="p-4">Nome do Player</th>
+                                    <th class="p-4 text-center bg-emerald-950/30 text-emerald-400">Alta Performance</th>
+                                    <th class="p-4 text-center bg-blue-950/30 text-blue-400">Potencial Crescimento</th>
+                                    <th class="p-4 text-center bg-amber-950/30 text-amber-400">Baixa Doação</th>
+                                    <th class="p-4 text-center bg-rose-950/30 text-rose-400">Baixa Atividade</th>
+                                    <th class="p-4 text-center">Aparições Totais</th>
+                                    <th class="p-4 text-center">Status Atual</th>
+                                    <th class="p-4 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="individual-table-body" class="divide-y divide-gold-950/20">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-ferramentas-dados" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gradient-to-br from-military-900 to-black border border-gold-950 p-6 rounded-xl space-y-4">
+                    <h3 class="text-lg font-accent font-bold text-gold-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Backup & Transferência da Base
+                    </h3>
+                    <p class="text-xs text-slate-400">
+                        Os dados são carregados a partir do arquivo corporativo local. Você pode exportar as informações mesmo sem acesso administrativo. Porém, carregar uma nova base de dados requer a ativação do Modo de Edição.
+                    </p>
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <button onclick="exportarDados()" class="bg-gold-700 hover:bg-gold-600 text-white text-xs font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 transition-all">
+                            <i class="fa-solid fa-file-export"></i> Exportar Base de Dados (.json)
+                        </button>
+                        <label id="btn-import-wrapper" class="bg-military-850 hover:bg-military-800 border border-gold-900/40 text-gold-300 text-xs font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 cursor-pointer transition-all opacity-50 cursor-not-allowed">
+                            <i class="fa-solid fa-file-import"></i> Carregar Nova Base (.json)
+                            <input type="file" id="import-file" onchange="importarDados(event)" class="hidden" disabled>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-military-900 to-black border border-gold-950 p-6 rounded-xl space-y-4">
+                    <h3 class="text-lg font-accent font-bold text-red-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-red-500"></i> Área de Reset
+                    </h3>
+                    <p class="text-xs text-slate-400">
+                        Deseja limpar totalmente o histórico atual da sessão e iniciar com a aliança BaR em branco? (Apenas para Administradores)
+                    </p>
+                    <div class="pt-2">
+                        <button id="btn-limpar-dados" onclick="confirmarLimpezaDados()" class="bg-red-950/50 hover:bg-red-900 text-red-300 border border-red-800 text-xs font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fa-solid fa-trash-can"></i> Limpar Todo o Histórico da Aliança
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-controle-eventos" class="hidden space-y-6">
+            <div class="bg-military-900/30 border border-gold-950 p-5 rounded-xl">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 border-b border-gold-950 pb-4">
+                    <div>
+                        <h2 class="text-xl font-accent font-black text-gold-400 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-days"></i> Presença em Eventos Oficiais
+                        </h2>
+                        <p class="text-xs text-slate-400">Teixeira (R4) pode gerenciar a chamada e participação dos combatentes.</p>
+                    </div>
+                    <button id="btn-novo-evento" onclick="toggleEventoModal(true)" class="bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-500 hover:to-gold-600 text-black font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-2 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-calendar-plus"></i> Novo Evento
+                    </button>
+                </div>
+                <div id="lista-eventos-container" class="space-y-6"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL DE DIGITAR SENHA -->
+    <div id="modal-senha-admin" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-military-950 border-2 border-gold-600 rounded-xl w-full max-w-sm overflow-hidden shadow-[0_0_50px_rgba(218,138,19,0.4)]">
+            <div class="bg-gradient-to-r from-military-900 via-beer-dark to-military-900 p-4 border-b border-gold-950 flex items-center justify-between">
+                <h3 class="font-accent font-bold text-gold-300 uppercase tracking-widest text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-lock-open"></i> Ativar Modo de Edição
+                </h3>
+                <button onclick="fecharModalSenha()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form onsubmit="validarSenhaAdmin(event)" class="p-6 space-y-4">
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Apenas os generais da Corporação BaR com credenciais de comando podem editar os dados estratégicos de auditoria.
+                </p>
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1 text-xs">Senha Administrativa *</label>
+                    <input type="password" id="input-senha-admin" required placeholder="Digite a senha..." class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white placeholder-slate-600 focus:outline-none focus:border-gold-500 text-sm">
+                </div>
+                <div id="senha-erro-msg" class="hidden text-xs text-red-400 font-semibold">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Senha inválida! Acesso negado.
+                </div>
+                <div class="pt-2 flex justify-end gap-2 text-xs">
+                    <button type="button" onclick="fecharModalSenha()" class="bg-military-900 hover:bg-military-850 text-slate-300 font-semibold px-4 py-2 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-500 hover:to-gold-600 text-black font-bold px-5 py-2 rounded-lg">
+                        Desbloquear
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE FORMULÁRIO DE REGISTRO (ADICIONAR/EDITAR) -->
+    <div id="modal-form-registro" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-military-950 border-2 border-gold-600 rounded-xl w-full max-w-lg overflow-hidden shadow-[0_0_50px_rgba(218,138,19,0.3)]">
+            <div class="bg-gradient-to-r from-military-900 via-beer-dark to-military-900 p-4 border-b border-gold-950 flex items-center justify-between">
+                <h3 id="modal-title" class="font-accent font-bold text-gold-300 uppercase tracking-widest text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Novo Registro de Player
+                </h3>
+                <button onclick="toggleFormModal(false)" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <form id="registro-form" onsubmit="salvarFormulario(event)" class="p-6 space-y-4 text-xs">
+                <input type="hidden" id="form-id">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Data da Coleta *</label>
+                        <input type="date" id="form-data" required class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Rank *</label>
+                        <select id="form-rank" required class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                            <option value="Líder">Líder (R5)</option>
+                            <option value="R4">R4</option>
+                            <option value="R3">R3</option>
+                            <option value="R2">R2</option>
+                            <option value="R1">R1</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Nome do Jogador *</label>
+                        <input type="text" id="form-nome" required placeholder="Ex: BaR_Guerreiro" class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white placeholder-slate-600 focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Nível da Cidade (Nv) *</label>
+                        <input type="number" id="form-nivel" required min="1" max="40" placeholder="Ex: 25" class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Poder de Combate *</label>
+                        <input type="number" id="form-poder" required min="0" placeholder="Ex: 15000000" class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Doação / Contribuição Semanal *</label>
+                        <input type="number" id="form-doacao" required min="0" placeholder="Ex: 75000" class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Dias Offline *</label>
+                        <input type="number" id="form-offline" required min="0" placeholder="0 se estiver online" class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Data de Admissão (Opcional)</label>
+                        <input type="date" id="form-admissao" class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Data de Demissão / Saída (Opcional)</label>
+                    <input type="date" id="form-demissao" class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                    <p class="text-[10px] text-slate-500 mt-1">Deixe em branco caso o jogador ainda seja ativo (ON).</p>
+                </div>
+
+                <div class="pt-4 border-t border-gold-950 flex justify-end gap-2">
+                    <button type="button" onclick="toggleFormModal(false)" class="bg-military-900 hover:bg-military-850 text-slate-300 font-semibold px-4 py-2.5 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-500 hover:to-gold-600 text-black font-bold px-6 py-2.5 rounded-lg">
+                        Salvar Registro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE EXCLUSÃO DE ITEM -->
+    <div id="modal-confirm-delete" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-military-950 border-2 border-red-700 rounded-xl w-full max-w-sm overflow-hidden p-6 shadow-2xl">
+            <h3 class="font-accent font-bold text-red-400 uppercase tracking-widest text-sm mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> Confirmar Exclusão
+            </h3>
+            <p class="text-xs text-slate-300 mb-6">
+                Tem certeza de que deseja apagar permanentemente este registro de coleta? Essa ação não pode ser desfeita.
+            </p>
+            <div class="flex justify-end gap-2 text-xs">
+                <button onclick="toggleDeleteModal(false)" class="bg-military-900 hover:bg-military-850 text-slate-300 font-semibold px-4 py-2 rounded-lg">
+                    Cancelar
+                </button>
+                <button id="btn-confirm-delete-action" class="bg-red-800 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg">
+                    Apagar Registro
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DO RESET COMPLETO -->
+    <div id="modal-confirm-reset" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-military-950 border-2 border-red-700 rounded-xl w-full max-w-sm overflow-hidden p-6 shadow-2xl">
+            <h3 class="font-accent font-bold text-red-400 uppercase tracking-widest text-sm mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> Limpar Todo o Histórico
+            </h3>
+            <p class="text-xs text-slate-300 mb-6">
+                Atenção, General: Tem certeza de que deseja apagar permanentemente todo o histórico de coletas desta sessão e começar do zero? Essa ação não pode ser desfeita.
+            </p>
+            <div class="flex justify-end gap-2 text-xs">
+                <button onclick="toggleResetModal(false)" class="bg-military-900 hover:bg-military-850 text-slate-300 font-semibold px-4 py-2 rounded-lg">
+                    Cancelar
+                </button>
+                <button onclick="executarLimpezaDados()" class="bg-red-800 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg">
+                    Confirmar Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-form-evento" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-military-950 border-2 border-gold-600 rounded-xl w-full max-w-sm overflow-hidden shadow-[0_0_50px_rgba(218,138,19,0.4)]">
+            <div class="bg-gradient-to-r from-military-900 via-beer-dark to-military-900 p-4 border-b border-gold-950 flex items-center justify-between">
+                <h3 class="font-accent font-bold text-gold-300 uppercase tracking-widest text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-plus"></i> Agendar Novo Evento
+                </h3>
+                <button onclick="toggleEventoModal(false)" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form onsubmit="salvarNovoEvento(event)" class="p-6 space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Nome/Tipo do Evento *</label>
+                    <input type="text" id="evt-nome" required placeholder="Ex: Guerra de Aliança" class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                </div>
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Data e Horário *</label>
+                    <input type="datetime-local" id="evt-horario" required class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="toggleEventoModal(false)" class="bg-military-900 hover:bg-military-850 text-slate-300 font-semibold px-4 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-gradient-to-r from-gold-600 to-gold-700 text-black font-bold px-5 py-2 rounded-lg">Criar Evento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="max-w-7xl mx-auto px-4 py-12 text-center text-xs text-slate-500 border-t border-gold-950/40">
+        <p class="font-accent tracking-widest text-gold-600 font-bold mb-2">CORPORAÇÃO BaR — ALIANÇA MILITAR</p>
+        <p>© 2026 Kingshot Strategy Alliances. Todos os direitos reservados aos generais do BaR.</p>
+        <p class="mt-4 font-mono text-[10px]">Desenvolvido pelo Analista de Inteligência e Comando BaR.</p>
+    </footer>
+
+
+    <script>
+        // Estado global da aplicação (In-Memory)
+        let dbColetas = [];
+        let dbEventos = JSON.parse(localStorage.getItem('BaR_dbEventos')) || [];
+        let registroIdParaDeletar = null;
+        
+        // Estado de segurança
+        let isAdmin = false;
+        // Senha configurada para liberação dos controles de edição
+        const SENHA_SECRETA = "BaR2026";
+
+        // Ao carregar a página
+        window.onload = function() {
+            // Define a data atual nos locais informativos e padrão de formulário
+            const hoje = new Date().toISOString().split('T')[0];
+            const formInputDate = document.getElementById('form-data');
+            if (formInputDate) {
+                formInputDate.value = hoje;
+            }
+            
+            // Formatando data atual para cabeçalho em português
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const headerDataEl = document.getElementById('header-data-atual');
+            if (headerDataEl) {
+                headerDataEl.innerText = new Date().toLocaleDateString('pt-PT', options);
+            }
+
+            // Carrega prioritariamente o ficheiro infos.json
+            fetch('./infos.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ficheiro infos.json não encontrado ou erro na requisição');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        dbColetas = data;
+                        showToast("Dados carregados com sucesso a partir de infos.json!");
+                    } else if (data && Array.isArray(data.coletas)) {
+                        dbColetas = data.coletas;
+                        if (Array.isArray(data.eventos)) {
+                            dbEventos = data.eventos;
+                            localStorage.setItem('BaR_dbEventos', JSON.stringify(dbEventos));
+                        }
+                        showToast("Dados completos carregados com sucesso!");
+                    } else {
+                        throw new Error('O formato do ficheiro é inválido');
+                    }
+                    inicializarInterface();
+                })
+                .catch(error => {
+                    console.warn(error.message + ' -> Inicializando painel com dados locais.');
+                    inicializarInterface();
+                });
+        };
+
+        // Função para disparar a renderização após a carga
+        function inicializarInterface() {
+            recalcularPainelEstatistico();
+            renderDatabaseTable();
+            renderAtividadeIndividual();
+            atualizarControlesEdicao();
+        }
+
+        // ================= SISTEMA DE SEGURANÇA E ADM =================
+        
+        function abrirModalSenha() {
+            if (isAdmin) {
+                // Se já for Admin, ao clicar no botão o usuário faz Logout
+                isAdmin = false;
+                showToast("Modo de Edição bloqueado com sucesso!");
+                atualizarControlesEdicao();
+                recalcularPainelEstatistico();
+                renderDatabaseTable();
+                renderAtividadeIndividual();
+                if (!document.getElementById('tab-controle-eventos').classList.contains('hidden')) {
+                    renderizarEventos();
+                }
+            } else {
+                const erroMsg = document.getElementById('senha-erro-msg');
+                if (erroMsg) erroMsg.classList.add('hidden');
+                
+                const senhaInput = document.getElementById('input-senha-admin');
+                if (senhaInput) senhaInput.value = "";
+                
+                const modalSenha = document.getElementById('modal-senha-admin');
+                if (modalSenha) modalSenha.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    const inputFocus = document.getElementById('input-senha-admin');
+                    if (inputFocus) inputFocus.focus();
+                }, 100);
+            }
+        }
+
+        function fecharModalSenha() {
+            const modalSenha = document.getElementById('modal-senha-admin');
+            if (modalSenha) modalSenha.classList.add('hidden');
+        }
+
+        function validarSenhaAdmin(event) {
+            event.preventDefault();
+            const inputSenha = document.getElementById('input-senha-admin');
+            const senhaDigitada = inputSenha ? inputSenha.value : "";
+
+            if (senhaDigitada === SENHA_SECRETA) {
+                isAdmin = true;
+                fecharModalSenha();
+                showToast("Modo de Edição ativado! Permissões de escrita liberadas.");
+                atualizarControlesEdicao();
+                recalcularPainelEstatistico();
+                renderDatabaseTable();
+                renderAtividadeIndividual();
+                if (!document.getElementById('tab-controle-eventos').classList.contains('hidden')) {
+                    renderizarEventos();
+                }
+            } else {
+                const erroMsg = document.getElementById('senha-erro-msg');
+                if (erroMsg) erroMsg.classList.remove('hidden');
+                if (inputSenha) inputSenha.value = "";
+            }
+        }
+
+        // Desabilita, oculta ou altera elementos baseados no estado do Admin
+        function atualizarControlesEdicao() {
+            const btnToggle = document.getElementById('btn-toggle-admin');
+            const statusPermissao = document.getElementById('status-permissao');
+            const btnNovo = document.getElementById('btn-novo-registro');
+            const btnImportWrapper = document.getElementById('btn-import-wrapper');
+            const fileInput = document.getElementById('import-file');
+            const btnLimpar = document.getElementById('btn-limpar-dados');
+            const btnNovoEvento = document.getElementById('btn-novo-evento');
+
+            if (isAdmin) {
+                // Modo Admin Ativo
+                if (btnToggle) {
+                    btnToggle.innerHTML = '<i class="fa-solid fa-lock"></i> <span>Bloquear Edição</span>';
+                    btnToggle.className = "bg-gradient-to-r from-red-700 to-rose-800 hover:from-red-600 hover:to-rose-700 text-white text-xs font-bold py-2 px-3 rounded-md flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(244,63,94,0.3)]";
+                }
+                if (statusPermissao) {
+                    statusPermissao.innerHTML = '<i class="fa-solid fa-lock-open text-green-400"></i> <span class="text-green-400">Modo de Edição Ativo</span>';
+                }
+                if (btnNovo) btnNovo.removeAttribute('disabled');
+                if (btnImportWrapper) btnImportWrapper.classList.remove('opacity-50', 'cursor-not-allowed');
+                if (fileInput) fileInput.removeAttribute('disabled');
+                if (btnLimpar) btnLimpar.removeAttribute('disabled');
+                if (btnNovoEvento) btnNovoEvento.removeAttribute('disabled');
+            } else {
+                // Modo Apenas Leitura
+                if (btnToggle) {
+                    btnToggle.innerHTML = '<i class="fa-solid fa-key"></i> <span>Ativar Edição</span>';
+                    btnToggle.className = "bg-gradient-to-r from-gold-600 to-amber-700 hover:from-gold-500 hover:to-amber-600 text-black text-xs font-bold py-2 px-3 rounded-md flex items-center gap-1.5 transition-all";
+                }
+                if (statusPermissao) {
+                    statusPermissao.innerHTML = '<i class="fa-solid fa-lock text-amber-500"></i> <span class="text-amber-500">Modo Leitura</span>';
+                }
+                if (btnNovo) btnNovo.setAttribute('disabled', 'true');
+                if (btnImportWrapper) btnImportWrapper.classList.add('opacity-50', 'cursor-not-allowed');
+                if (fileInput) fileInput.setAttribute('disabled', 'true');
+                if (btnLimpar) btnLimpar.setAttribute('disabled', 'true');
+                if (btnNovoEvento) btnNovoEvento.setAttribute('disabled', 'true');
+            }
+        }
+
+        // ================= SISTEMA DE NAVEGAÇÃO DE ABAS =================
+        function switchTab(tabId) {
+            // Oculta todas as seções
+            const tabGerais = document.getElementById('tab-informacoes-gerais');
+            const tabDetalhada = document.getElementById('tab-base-detalhada');
+            const tabAtividade = document.getElementById('tab-controle-atividade');
+            const tabFerramentas = document.getElementById('tab-ferramentas-dados');
+            const tabEventos = document.getElementById('tab-controle-eventos');
+
+            if (tabGerais) tabGerais.classList.add('hidden');
+            if (tabDetalhada) tabDetalhada.classList.add('hidden');
+            if (tabAtividade) tabAtividade.classList.add('hidden');
+            if (tabFerramentas) tabFerramentas.classList.add('hidden');
+            if (tabEventos) tabEventos.classList.add('hidden');
+
+            // Reseta cores dos botões
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('bg-gold-700', 'text-white', 'shadow-lg');
+                btn.classList.add('bg-military-900', 'text-slate-300');
+            });
+
+            // Mostra a selecionada
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.remove('hidden');
+
+            // Destaca botão selecionado
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-military-900', 'text-slate-300');
+                activeBtn.classList.add('bg-gold-700', 'text-white', 'shadow-lg');
+            }
+
+            // Ações extras ao trocar de aba para garantir dados novos
+            if (tabId === 'informacoes-gerais') {
+                recalcularPainelEstatistico();
+            } else if (tabId === 'base-detalhada') {
+                renderDatabaseTable();
+            } else if (tabId === 'controle-atividade') {
+                renderAtividadeIndividual();
+            } else if (tabId === 'controle-eventos') {
+                renderizarEventos();
+            }
+        }
+
+        // ================= AUXILIARES DE FORMATAÇÃO E MOEDA =================
+        function formatarNumero(num) {
+            return Number(num).toLocaleString('pt-PT');
+        }
+
+        function formatarData(dataStr) {
+            if (!dataStr) return "-";
+            const partes = dataStr.split('-');
+            if (partes.length < 3) return dataStr;
+            const [ano, mes, dia] = partes;
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        // Exibir mensagem na tela (Toast)
+        function showToast(mensagem) {
+            const toast = document.getElementById('toast-msg');
+            const txt = document.getElementById('toast-text');
+            if (toast && txt) {
+                txt.innerText = mensagem;
+                toast.classList.remove('hidden');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        // ================= PROCESSAMENTO DE DADOS (CÁLCULOS PRINCIPAIS) =================
+
+        // Encontra o registro de data mais recente cadastrado para termos o panorama da "aliança hoje"
+        function obterUltimaDataColeta() {
+            if (dbColetas.length === 0) return null;
+            return dbColetas.reduce((max, r) => r.data > max ? r.data : max, dbColetas[0].data);
+        }
+
+        // Retorna a lista de players com sua última coleta realizada (Membro Ativo se não houver data de demissão)
+        function obterMembrosNoPanoramaAtual() {
+            if (dbColetas.length === 0) return [];
+            
+            // Agrupar registros por jogador e pegar o mais recente com base na data de coleta
+            const playerUltimoRegistro = {};
+            dbColetas.forEach(r => {
+                if (!playerUltimoRegistro[r.nome] || r.data > playerUltimoRegistro[r.nome].data) {
+                    playerUltimoRegistro[r.nome] = r;
+                }
+            });
+
+            return Object.values(playerUltimoRegistro);
+        }
+
+        // Calcula as médias e as notas com base nos players ativos (ON) no panorama de coletas atual
+        function calcularMetricasAtuais(membrosAtuais) {
+            // Consideramos apenas membros ativos atualmente (sem data de demissão cadastrada)
+            const membrosAtivos = membrosAtuais.filter(m => !m.demissao);
+
+            const totalAtivos = membrosAtivos.length;
+            if (totalAtivos === 0) {
+                return { mediaPoder: 0, mediaDoacao: 0, notaCorte: 0, pctCumpremCorte: 0, totalAtivos: 0 };
+            }
+
+            const somaPoder = membrosAtivos.reduce((acc, curr) => acc + Number(curr.poder), 0);
+            const somaDoacao = membrosAtivos.reduce((acc, curr) => acc + Number(curr.doacao), 0);
+
+            const mediaPoder = Math.round(somaPoder / totalAtivos);
+            const mediaDoacao = Math.round(somaDoacao / totalAtivos);
+            const notaCorte = Math.round(mediaPoder * 0.70);
+
+            // Quantos cumprem a nota de corte (poder >= notaCorte)
+            const cumpremCorte = membrosAtivos.filter(m => Number(m.poder) >= notaCorte).length;
+            const pctCumpremCorte = Math.round((cumpremCorte / totalAtivos) * 100);
+
+            return {
+                mediaPoder,
+                mediaDoacao,
+                notaCorte,
+                pctCumpremCorte,
+                totalAtivos
+            };
+        }
+
+        // Determinar Quadrante de um jogador com base em seu poder/doação comparado à média
+        function calcularQuadrante(poder, doacao, mediaPoder, mediaDoacao) {
+            poder = Number(poder);
+            doacao = Number(doacao);
+
+            if (poder >= mediaPoder && doacao >= mediaDoacao) {
+                return { num: 1, nome: "Alta Performance", cor: "text-emerald-400 bg-emerald-950/40 border border-emerald-900/55" };
+            } else if (poder < mediaPoder && doacao >= mediaDoacao) {
+                return { num: 2, nome: "Potencial de Crescimento", cor: "text-blue-400 bg-blue-950/40 border border-blue-900/55" };
+            } else if (poder >= mediaPoder && doacao < mediaDoacao) {
+                return { num: 3, nome: "Baixa Doação", cor: "text-amber-400 bg-amber-950/40 border border-amber-900/55" };
+            } else {
+                return { num: 4, nome: "Baixa Atividade", cor: "text-rose-400 bg-rose-950/40 border border-rose-900/55" };
+            }
+        }
+
+
+        // ================= RENDERIZAÇÕES DO DASHBOARD =================
+        function recalcularPainelEstatistico() {
+            const todosPanorama = obterMembrosNoPanoramaAtual();
+            const ativosOn = todosPanorama.filter(m => !m.demissao);
+            const metricas = calcularMetricasAtuais(todosPanorama);
+
+            // Preenche cards de forma segura
+            const totalMembrosHeader = document.getElementById('header-total-membros');
+            if (totalMembrosHeader) totalMembrosHeader.innerText = ativosOn.length;
+
+            const mediaPoderCard = document.getElementById('metric-media-poder');
+            if (mediaPoderCard) mediaPoderCard.innerText = formatarNumero(metricas.mediaPoder);
+
+            const mediaDoacaoCard = document.getElementById('metric-media-doacao');
+            if (mediaDoacaoCard) mediaDoacaoCard.innerText = formatarNumero(metricas.mediaDoacao);
+
+            const notaCorteCard = document.getElementById('metric-nota-corte');
+            if (notaCorteCard) notaCorteCard.innerText = formatarNumero(metricas.notaCorte);
+
+            const cumpremCorteCard = document.getElementById('metric-cumprem-corte');
+            if (cumpremCorteCard) cumpremCorteCard.innerText = `${metricas.pctCumpremCorte}%`;
+
+            const ativosOnCard = document.getElementById('metric-ativos-on');
+            if (ativosOnCard) ativosOnCard.innerText = `${ativosOn.length} / ${todosPanorama.length}`;
+
+            // Atualiza spans flutuantes do corte nas explicações
+            const corteSpans = document.querySelectorAll('.corte-span');
+            corteSpans.forEach(s => s.innerText = formatarNumero(metricas.notaCorte));
+
+            // Filtrar e preencher Listagens dos Quadrantes para Membros ON
+            const listas = {
+                1: { id: "list-alta-performance", countId: "quad-alta-count", html: "" },
+                2: { id: "list-potencial-crescimento", countId: "quad-potencial-count", html: "" },
+                3: { id: "list-baixa-doacao", countId: "quad-doacao-count", html: "" },
+                4: { id: "list-baixa-atividade", countId: "quad-atividade-count", html: "" }
+            };
+
+            const contadores = { 1: 0, 2: 0, 3: 0, 4: 0 };
+
+            // Classifica os ativos
+            ativosOn.forEach(m => {
+                const quad = calcularQuadrante(m.poder, m.doacao, metricas.mediaPoder, metricas.mediaDoacao);
+                contadores[quad.num]++;
+                
+                listas[quad.num].html += `
+                    <div class="flex items-center justify-between p-2 bg-black/40 rounded border border-gold-950/30 hover:border-gold-500/20 transition-all">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-200">${m.nome}</span>
+                            <span class="text-[10px] text-slate-500 px-1 border border-slate-700 rounded">${m.rank}</span>
+                        </div>
+                        <div class="text-right text-[11px] font-mono">
+                            <div class="text-slate-300">Poder: ${formatarNumero(m.poder)}</div>
+                            <div class="text-gold-400">Doação: ${formatarNumero(m.doacao)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Atualiza o DOM dos quadrantes de forma segura
+            Object.keys(listas).forEach(num => {
+                const countEl = document.getElementById(listas[num].countId);
+                if (countEl) countEl.innerText = contadores[num];
+
+                const listEl = document.getElementById(listas[num].id);
+                if (listEl) {
+                    if (listas[num].html === "") {
+                        listEl.innerHTML = `<p class="text-slate-600 italic text-center py-4">Nenhum guerreiro ativo neste quadrante.</p>`;
+                    } else {
+                        listEl.innerHTML = listas[num].html;
+                    }
+                }
+            });
+
+            // Lista Alerta de Inativos
+            const inativos = ativosOn.filter(m => Number(m.offline) >= 1).sort((a, b) => b.offline - a.offline);
+            const containerInativos = document.getElementById('lista-inativos');
+            
+            if (containerInativos) {
+                if (inativos.length === 0) {
+                    containerInativos.innerHTML = `
+                        <div class="p-3 bg-green-950/10 border border-green-500/10 rounded-lg text-center">
+                            <p class="text-green-400 text-xs font-bold"><i class="fa-solid fa-square-check mr-1"></i> Todos estão ativos hoje!</p>
+                        </div>
+                    `;
+                } else {
+                    let inativosHtml = "";
+                    inativos.forEach(m => {
+                        const statusCor = m.offline >= 5 ? 'text-red-400 bg-red-950/30 border-red-900/50' : 'text-amber-400 bg-amber-950/30 border-amber-900/50';
+                        inativosHtml += `
+                            <div class="p-2 rounded-lg flex items-center justify-between border ${statusCor}">
+                                <div>
+                                    <span class="font-bold block text-slate-200 text-xs">${m.nome}</span>
+                                    <span class="text-[9px] uppercase tracking-wider text-slate-500">Último sinal em ${formatarData(m.data)}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold">${m.offline} dia(s) OFF</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    containerInativos.innerHTML = inativosHtml;
+                }
+            }
+        }
+
+
+        // ================= TABELA DETALHADA =================
+        function renderDatabaseTable() {
+            const queryInput = document.getElementById('db-search');
+            const query = queryInput ? queryInput.value.toLowerCase() : "";
+            
+            const filterStatusInput = document.getElementById('db-filter-status');
+            const filterStatus = filterStatusInput ? filterStatusInput.value : "todos";
+            
+            const tbody = document.getElementById('db-table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = "";
+
+            const todosPanorama = obterMembrosNoPanoramaAtual();
+            const metricas = calcularMetricasAtuais(todosPanorama);
+
+            // Filtros aplicados na base completa de coletas
+            let registrosFiltrados = dbColetas.filter(r => {
+                const matchesSearch = r.nome.toLowerCase().includes(query) || r.rank.toLowerCase().includes(query);
+                
+                let matchesStatus = true;
+                if (filterStatus === 'on') {
+                    matchesStatus = !r.demissao;
+                } else if (filterStatus === 'off') {
+                    matchesStatus = !!r.demissao;
+                }
+
+                return matchesSearch && matchesStatus;
+            });
+
+            // Ordena os registros por data de coleta descendente
+            registrosFiltrados.sort((a,b) => b.data.localeCompare(a.data));
+
+            const dbTableInfo = document.getElementById('db-table-info');
+            if (dbTableInfo) {
+                dbTableInfo.innerText = `Mostrando ${registrosFiltrados.length} registos de ${dbColetas.length}`;
+            }
+
+            if (registrosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" class="p-8 text-center text-slate-500 italic">
+                            Nenhum registo de coleta encontrado para os parâmetros informados.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            registrosFiltrados.forEach(r => {
+                const quad = calcularQuadrante(r.poder, r.doacao, metricas.mediaPoder, metricas.mediaDoacao);
+                
+                let rowBgStyle = "hover:bg-slate-900/40 transition-colors";
+                let badgeClass = "";
+
+                if (quad.num === 1) {
+                    badgeClass = "bg-emerald-950 text-emerald-400 border border-emerald-800";
+                    rowBgStyle += " bg-emerald-950/5";
+                } else if (quad.num === 2 || quad.num === 3) {
+                    badgeClass = "bg-amber-950 text-amber-400 border border-amber-800";
+                    rowBgStyle += " bg-amber-950/5";
+                } else if (quad.num === 4) {
+                    badgeClass = "bg-rose-950 text-rose-400 border border-rose-800";
+                    rowBgStyle += " bg-rose-950/10";
+                }
+
+                // Renderiza botões de ação se o usuário for Admin, senão exibe um ícone de cadeado
+                let botoesAcaoHtml = "";
+                if (isAdmin) {
+                    botoesAcaoHtml = `
+                        <button onclick="editarRegistro('${r.id}')" title="Editar" class="bg-blue-900/30 text-blue-400 hover:bg-blue-800 hover:text-white px-2 py-1 rounded transition-all">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="abrirConfirmacaoDeletar('${r.id}')" title="Apagar" class="bg-red-900/30 text-red-400 hover:bg-red-800 hover:text-white px-2 py-1 rounded transition-all">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    `;
+                } else {
+                    botoesAcaoHtml = `
+                        <span class="text-slate-500 flex items-center justify-center w-full" title="Ative a edição para gerir">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </span>
+                    `;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="${rowBgStyle}">
+                        <td class="p-4 flex items-center gap-1.5 justify-center whitespace-nowrap">
+                            ${botoesAcaoHtml}
+                        </td>
+                        <td class="p-4 font-mono font-semibold">${formatarData(r.data)}</td>
+                        <td class="p-4 font-bold text-slate-200">
+                            ${r.nome} 
+                            ${r.demissao ? '<span class="text-[9px] bg-red-950/80 text-red-400 px-1 rounded ml-1 border border-red-900/50">OFF (Saída)</span>' : ''}
+                        </td>
+                        <td class="p-4"><span class="bg-slate-900 text-slate-300 border border-slate-800 px-1.5 py-0.5 rounded text-[10px] font-bold">${r.rank}</span></td>
+                        <td class="p-4 text-right font-mono font-bold">${formatarNumero(r.poder)}</td>
+                        <td class="p-4 text-center font-mono">${r.nivel}</td>
+                        <td class="p-4 text-center font-mono ${r.offline >= 3 ? 'text-red-400 font-bold' : ''}">${r.offline} d</td>
+                        <td class="p-4 text-right font-mono font-bold text-gold-400">${formatarNumero(r.doacao)}</td>
+                        <td class="p-4 text-center">
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold inline-block ${badgeClass}">
+                                Q${quad.num} - ${quad.nome}
+                            </span>
+                        </td>
+                        <td class="p-4 text-slate-400 font-mono">${formatarData(r.admissao)}</td>
+                        <td class="p-4 text-slate-400 font-mono">${r.demissao ? formatarData(r.demissao) : `<span class="text-[9px] text-emerald-400 font-bold bg-emerald-950/30 px-1 rounded border border-emerald-900/50">Ativo</span>`}</td>
+                    </tr>
+                `;
+            });
+        }
+
+
+        // ================= ATIVIDADE INDIVIDUAL =================
+        function renderAtividadeIndividual() {
+            const tbody = document.getElementById('individual-table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = "";
+
+            if (dbColetas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-500 italic">Nenhum dado cadastrado.</td></tr>`;
+                return;
+            }
+
+            const todosPanorama = obterMembrosNoPanoramaAtual();
+            const metricas = calcularMetricasAtuais(todosPanorama);
+
+            // Agrupa e conta aparições por jogador
+            const fichaPlayers = {};
+
+            dbColetas.forEach(r => {
+                const nome = r.nome;
+                if (!fichaPlayers[nome]) {
+                    fichaPlayers[nome] = {
+                        nome: nome,
+                        quad1: 0,
+                        quad2: 0,
+                        quad3: 0,
+                        quad4: 0,
+                        totalColetas: 0,
+                        ultimoRegistro: r
+                    };
+                }
+
+                if (r.data > fichaPlayers[nome].ultimoRegistro.data) {
+                    fichaPlayers[nome].ultimoRegistro = r;
+                }
+
+                const quad = calcularQuadrante(r.poder, r.doacao, metricas.mediaPoder, metricas.mediaDoacao);
+                fichaPlayers[nome][`quad${quad.num}`]++;
+                fichaPlayers[nome].totalColetas++;
+            });
+
+            const listado = Object.values(fichaPlayers).sort((a,b) => a.nome.localeCompare(b.nome));
+
+            listado.forEach(f => {
+                const statusOn = !f.ultimoRegistro.demissao;
+                const statusBadge = statusOn 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-900/60 font-bold">ATIVO (ON)</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] bg-red-950 text-red-400 border border-red-900/60 font-bold">REMOVIDO (OFF)</span>`;
+
+                // Renderiza botão se for admin, caso contrário renderiza travado/desativado
+                let botaoStatusHtml = "";
+                if (isAdmin) {
+                    botaoStatusHtml = `
+                        <button onclick="alternarStatusFicha('${f.nome}')" class="bg-slate-800 hover:bg-slate-700 text-gold-400 text-[10px] px-2.5 py-1 rounded border border-gold-900/40 transition-all font-semibold">
+                            <i class="fa-solid fa-arrows-rotate mr-1 text-[9px]"></i> Alternar Status
+                        </button>
+                    `;
+                } else {
+                    botaoStatusHtml = `
+                        <span class="text-slate-500 text-[10px] flex items-center justify-center gap-1 italic" title="Ative a edição para alterar status">
+                            <i class="fa-solid fa-lock text-[8px]"></i> Bloqueado
+                        </span>
+                    `;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-900/30 transition-all">
+                        <td class="p-4 font-bold text-slate-200 text-sm">${f.nome}</td>
+                        <td class="p-4 text-center font-mono font-bold bg-emerald-950/10 text-emerald-300">${f.quad1}</td>
+                        <td class="p-4 text-center font-mono font-bold bg-blue-950/10 text-blue-300">${f.quad2}</td>
+                        <td class="p-4 text-center font-mono font-bold bg-amber-950/10 text-amber-300">${f.quad3}</td>
+                        <td class="p-4 text-center font-mono font-bold bg-rose-950/10 text-rose-300">${f.quad4}</td>
+                        <td class="p-4 text-center font-mono">${f.totalColetas}</td>
+                        <td class="p-4 text-center">${statusBadge}</td>
+                        <td class="p-4 text-center whitespace-nowrap">
+                            ${botaoStatusHtml}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Alterna rapidamente o status
+        function alternarStatusFicha(nome) {
+            if (!isAdmin) {
+                showToast("Acesso Negado: Ative o Modo de Edição primeiro!");
+                return;
+            }
+            let maisRecente = null;
+            dbColetas.forEach(r => {
+                if (r.nome === nome) {
+                    if (!maisRecente || r.data > maisRecente.data) {
+                        maisRecente = r;
+                    }
+                }
+            });
+
+            if (maisRecente) {
+                if (maisRecente.demissao) {
+                    maisRecente.demissao = "";
+                    showToast(`${nome} readmitido com sucesso!`);
+                } else {
+                    maisRecente.demissao = maisRecente.data;
+                    showToast(`${nome} marcado como inativo/demitido.`);
+                }
+                renderAtividadeIndividual();
+                recalcularPainelEstatistico();
+                renderDatabaseTable();
+            }
+        }
+
+
+        // ================= OPERAÇÕES DO MODAL (ADD / EDIT) =================
+        function toggleFormModal(show, titulo = "Novo Registo de Player") {
+            if (show && !isAdmin) {
+                showToast("Acesso Negado: Ative o Modo de Edição primeiro!");
+                return;
+            }
+            const modal = document.getElementById('modal-form-registro');
+            if (!modal) return;
+
+            const modalTitle = document.getElementById('modal-title');
+            if (modalTitle) {
+                modalTitle.innerHTML = `<i class="fa-solid fa-user-gear"></i> ${titulo}`;
+            }
+            
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+                const regForm = document.getElementById('registro-form');
+                if (regForm) regForm.reset();
+                
+                const formIdInput = document.getElementById('form-id');
+                if (formIdInput) formIdInput.value = "";
+                
+                const formDataInput = document.getElementById('form-data');
+                if (formDataInput) formDataInput.value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        function salvarFormulario(event) {
+            event.preventDefault();
+            if (!isAdmin) {
+                showToast("Operação não permitida: Modo Leitura!");
+                return;
+            }
+
+            const id = document.getElementById('form-id').value;
+            const data = document.getElementById('form-data').value;
+            const rank = document.getElementById('form-rank').value;
+            const nome = document.getElementById('form-nome').value.trim();
+            const nivel = parseInt(document.getElementById('form-nivel').value);
+            const poder = parseInt(document.getElementById('form-poder').value);
+            const doacao = parseInt(document.getElementById('form-doacao').value);
+            const offline = parseInt(document.getElementById('form-offline').value);
+            const admissao = document.getElementById('form-admissao').value;
+            const demissao = document.getElementById('form-demissao').value;
+
+            if (!nome) return;
+
+            if (id) {
+                const index = dbColetas.findIndex(r => r.id === id);
+                if (index !== -1) {
+                    dbColetas[index] = {
+                        id, data, rank, nome, nivel, poder, doacao, offline, admissao, demissao
+                    };
+                    showToast("Registo updated!");
+                }
+            } else {
+                const novoReg = {
+                    id: crypto.randomUUID(),
+                    data, rank, nome, nivel, poder, doacao, offline, admissao, demissao
+                };
+                dbColetas.push(novoReg);
+                showToast("Novo registo adicionado!");
+            }
+
+            toggleFormModal(false);
+            
+            recalcularPainelEstatistico();
+            renderDatabaseTable();
+            renderAtividadeIndividual();
+        }
+
+        function editarRegistro(id) {
+            if (!isAdmin) {
+                showToast("Acesso Negado: Ative o Modo de Edição!");
+                return;
+            }
+            const r = dbColetas.find(item => item.id === id);
+            if (!r) return;
+
+            document.getElementById('form-id').value = r.id;
+            document.getElementById('form-data').value = r.data;
+            document.getElementById('form-rank').value = r.rank;
+            document.getElementById('form-nome').value = r.nome;
+            document.getElementById('form-nivel').value = r.nivel;
+            document.getElementById('form-poder').value = r.poder;
+            document.getElementById('form-doacao').value = r.doacao;
+            document.getElementById('form-offline').value = r.offline;
+            document.getElementById('form-admissao').value = r.admissao || "";
+            document.getElementById('form-demissao').value = r.demissao || "";
+
+            toggleFormModal(true, "Editar Registo de Coleta");
+        }
+
+        // ================= OPERAÇÕES DE EXCLUSÃO =================
+        function abrirConfirmacaoDeletar(id) {
+            if (!isAdmin) {
+                showToast("Acesso Negado: Ative o Modo de Edição!");
+                return;
+            }
+            registroIdParaDeletar = id;
+            toggleDeleteModal(true);
+        }
+
+        // Modal Customizado (Elimina alertas do navegador)
+        function toggleDeleteModal(show) {
+            const modal = document.getElementById('modal-confirm-delete');
+            if (modal) {
+                if (show) {
+                    modal.classList.remove('hidden');
+                    const confirmAction = document.getElementById('btn-confirm-delete-action');
+                    if (confirmAction) confirmAction.onclick = executarDelecao;
+                } else {
+                    modal.classList.add('hidden');
+                    registroIdParaDeletar = null;
+                }
+            }
+        }
+
+        function executarDelecao() {
+            if (!isAdmin) return;
+            if (registroIdParaDeletar) {
+                dbColetas = dbColetas.filter(r => r.id !== registroIdParaDeletar);
+                showToast("Coleta excluída da base de dados!");
+                toggleDeleteModal(false);
+                
+                recalcularPainelEstatistico();
+                renderDatabaseTable();
+                renderAtividadeIndividual();
+            }
+        }
+
+
+        // ================= OPERAÇÕES DE RESET (CUSTOM MODAL) =================
+        function confirmarLimpezaDados() {
+            if (!isAdmin) {
+                showToast("Acesso Negado: Ative o Modo de Edição!");
+                return;
+            }
+            toggleResetModal(true);
+        }
+
+        function toggleResetModal(show) {
+            const modal = document.getElementById('modal-confirm-reset');
+            if (modal) {
+                if (show) {
+                    modal.classList.remove('hidden');
+                } else {
+                    modal.classList.add('hidden');
+                }
+            }
+        }
+
+        function executarLimpezaDados() {
+            if (!isAdmin) return;
+            dbColetas = [];
+            dbEventos = [];
+            localStorage.removeItem('BaR_dbEventos');
+            showToast("Todos os dados da sessão foram limpos.");
+            toggleResetModal(false);
+            
+            recalcularPainelEstatistico();
+            renderDatabaseTable();
+            renderAtividadeIndividual();
+            if (!document.getElementById('tab-controle-eventos').classList.contains('hidden')) {
+                renderizarEventos();
+            }
+        }
+
+
+        // ================= BACKUP & IMPORTAÇÃO DE DADOS =================
+        function exportarDados() {
+            // Qualquer usuário pode exportar a base estratégica atual para download
+            const exportObj = {
+                coletas: dbColetas,
+                eventos: dbEventos
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `BaR_Coletas_Kingshot_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Ficheiro exportado com sucesso!");
+        }
+
+        function importarDados(event) {
+            if (!isAdmin) {
+                showToast("Acesso Negado: Ative o Modo de Edição primeiro!");
+                return;
+            }
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importados = JSON.parse(e.target.result);
+                    if (Array.isArray(importados)) {
+                        dbColetas = importados;
+                        showToast("Base de dados de coletas importada com sucesso!");
+                    } else if (importados && (Array.isArray(importados.coletas) || Array.isArray(importados.eventos))) {
+                        dbColetas = importados.coletas || [];
+                        dbEventos = importados.eventos || [];
+                        localStorage.setItem('BaR_dbEventos', JSON.stringify(dbEventos));
+                        showToast("Base de dados completa (coletas e eventos) importada!");
+                    } else {
+                        showToast("Ficheiro inválido. Deve ser um array ou objeto JSON correspondente.");
+                        return;
+                    }
+                    
+                    recalcularPainelEstatistico();
+                    renderDatabaseTable();
+                    renderAtividadeIndividual();
+                    if (!document.getElementById('tab-controle-eventos').classList.contains('hidden')) {
+                        renderizarEventos();
+                    }
+                } catch (err) {
+                    showToast("Erro ao processar o ficheiro de importação.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ================= SISTEMA DE EVENTOS OFICIAIS =================
+        function toggleEventoModal(show) {
+            if (show && !isAdmin) {
+                showToast("Acesso Negado: Ative o Modo de Edição primeiro!");
+                return;
+            }
+            const modal = document.getElementById('modal-form-evento');
+            if (modal) {
+                if (show) {
+                    modal.classList.remove('hidden');
+                    document.getElementById('evt-nome').value = "";
+                    document.getElementById('evt-horario').value = "";
+                } else {
+                    modal.classList.add('hidden');
+                }
+            }
+        }
+
+        function salvarNovoEvento(event) {
+            event.preventDefault();
+            if (!isAdmin) {
+                showToast("Operação não permitida: Modo Leitura!");
+                return;
+            }
+
+            const nome = document.getElementById('evt-nome').value.trim();
+            const horario = document.getElementById('evt-horario').value;
+
+            if (!nome || !horario) return;
+
+            const novoEvt = {
+                id: crypto.randomUUID(),
+                nome: nome,
+                horario: horario,
+                presencas: [] // Array contendo nome dos combatentes presentes
+            };
+
+            dbEventos.push(novoEvt);
+            localStorage.setItem('BaR_dbEventos', JSON.stringify(dbEventos));
+            
+            showToast("Evento criado com sucesso!");
+            toggleEventoModal(false);
+            renderizarEventos();
+        }
+
+        function renderizarEventos() {
+            const container = document.getElementById('lista-eventos-container');
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            if (dbEventos.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-slate-500 border border-gold-950/20 bg-black/20 rounded-xl italic">
+                        Nenhum evento agendado ou concluído na base local de eventos.
+                    </div>
+                `;
+                return;
+            }
+
+            // Ordena eventos por data (mais antigos para mais recentes ou vice-versa)
+            const eventosOrdenados = [...dbEventos].sort((a,b) => b.horario.localeCompare(a.horario));
+
+            // Obtém combatentes ativos na corporação hoje
+            const combatentesAtivos = obterMembrosNoPanoramaAtual().filter(m => !m.demissao).sort((a,b) => a.nome.localeCompare(b.nome));
+
+            eventosOrdenados.forEach(evt => {
+                const totalMembros = combatentesAtivos.length;
+                const totalPresentes = combatentesAtivos.filter(m => evt.presencas.includes(m.nome)).length;
+                const percentual = totalMembros > 0 ? Math.round((totalPresentes / totalMembros) * 100) : 0;
+
+                // Formatar data do evento de forma legível
+                const dataFormatada = new Date(evt.horario).toLocaleString('pt-PT', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                // Botão de deletar visível/habilitado apenas para Admins
+                let deleteBtnHtml = "";
+                if (isAdmin) {
+                    deleteBtnHtml = `
+                        <button onclick="removerEvento('${evt.id}')" class="text-xs bg-red-950/40 hover:bg-red-900 border border-red-800 text-red-400 py-1.5 px-3 rounded-lg flex items-center gap-1.5 transition-all">
+                            <i class="fa-solid fa-trash-can"></i> Remover Evento
+                        </button>
+                    `;
+                }
+
+                let combatentesHtml = "";
+                if (totalMembros === 0) {
+                    combatentesHtml = `<p class="text-slate-500 italic text-xs py-2">Nenhum guerreiro ativo registado no panorama de coletas.</p>`;
+                } else {
+                    combatentesAtivos.forEach(m => {
+                        const estaPresente = evt.presencas.includes(m.nome);
+                        let badgeStyle = "bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200";
+                        let icon = '<i class="fa-regular fa-circle-xmark text-red-500 mr-1.5"></i>';
+
+                        if (estaPresente) {
+                            badgeStyle = "bg-emerald-950/80 border-emerald-800 text-emerald-400 hover:bg-emerald-900";
+                            icon = '<i class="fa-solid fa-circle-check text-green-400 mr-1.5"></i>';
+                        }
+
+                        // O clique chama alternarPresenca e altera a UI em tempo real
+                        combatentesHtml += `
+                            <button onclick="alternarPresenca('${evt.id}', '${m.nome}')" class="flex items-center text-left py-2 px-3 border rounded-lg text-xs transition-all ${badgeStyle}">
+                                ${icon}
+                                <div class="truncate">
+                                    <span class="font-bold block text-slate-100 truncate">${m.nome}</span>
+                                    <span class="text-[9px] text-slate-500 block">${m.rank}</span>
+                                </div>
+                            </button>
+                        `;
+                    });
+                }
+
+                container.innerHTML += `
+                    <div class="bg-black/40 border border-gold-950 rounded-xl p-5 hover:border-gold-800/40 transition-all">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gold-950/40 pb-4 mb-4">
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-gold-500 tracking-wider font-mono flex items-center gap-1.5">
+                                    <i class="fa-solid fa-clock"></i> ${dataFormatada}
+                                </span>
+                                <h3 class="font-accent text-base font-black text-slate-100 tracking-wide mt-1">${evt.nome}</h3>
+                            </div>
+                            
+                            <div class="flex flex-wrap items-center gap-4">
+                                <div class="bg-military-950/80 border border-gold-900/10 py-1.5 px-3 rounded-lg flex items-center gap-3 text-xs">
+                                    <span class="text-slate-400">Presença: <strong class="text-gold-400 font-mono">${totalPresentes}/${totalMembros}</strong></span>
+                                    <span class="h-4 w-px bg-gold-950/45"></span>
+                                    <span class="font-mono font-bold text-green-400">${percentual}%</span>
+                                </div>
+                                ${deleteBtnHtml}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-3">Lista de Chamada (Clique para confirmar/remover presença):</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                                ${combatentesHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function alternarPresenca(evtId, membroNome) {
+            if (!isAdmin) {
+                showToast("Acesso Negado: Ative o Modo de Edição primeiro!");
+                return;
+            }
+
+            const evt = dbEventos.find(e => e.id === evtId);
+            if (!evt) return;
+
+            const index = evt.presencas.indexOf(membroNome);
+            if (index === -1) {
+                evt.presencas.push(membroNome);
+                showToast(`Presença confirmada para ${membroNome}`);
+            } else {
+                evt.presencas.splice(index, 1);
+                showToast(`Presença removida para ${membroNome}`);
+            }
+
+            localStorage.setItem('BaR_dbEventos', JSON.stringify(dbEventos));
+            renderizarEventos();
+        }
+
+        function removerEvento(evtId) {
+            if (!isAdmin) {
+                showToast("Acesso Negado: Ative o Modo de Edição!");
+                return;
+            }
+
+            dbEventos = dbEventos.filter(e => e.id !== evtId);
+            localStorage.setItem('BaR_dbEventos', JSON.stringify(dbEventos));
+            
+            showToast("Evento removido com sucesso!");
+            renderizarEventos();
+        }
+    </script>
+</body>
+</html>
