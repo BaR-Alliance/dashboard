@@ -103,7 +103,7 @@
                 <div class="h-8 w-px bg-gold-900/40 hidden sm:block"></div>
                 <div class="flex items-center justify-between sm:justify-start gap-4">
                     <div>
-                        <span class="block text-[10px] text-slate-400 uppercase tracking-widest">Membros</span>
+                        <span class="block text-[10px] text-slate-400 uppercase tracking-widest">Membros (ON)</span>
                         <span id="header-total-membros" class="text-xl font-black font-accent text-gold-500">0</span>
                     </div>
                     <button id="btn-toggle-admin" onclick="abrirModalSenha()" class="bg-gradient-to-r from-gold-600 to-amber-700 hover:from-gold-500 hover:to-amber-600 text-black text-xs font-bold py-2 px-3 rounded-md flex items-center gap-1.5 transition-all">
@@ -125,7 +125,7 @@
                 <i class="fa-solid fa-database text-lg"></i>
                 <span>Base Detalhada</span>
             </button>
-            <button onclick="switchTab('controle-atividade')" id="btn-controle-atividade" class="tab-btn px-5 py-3 rounded-md font-semibold text-sm transition-all duration-300 flex items-center gap-2 bg-military-900 text-slate-300 hover:bg-military-800 hover:text-white">
+            <button onclick="switchTab('controle-activity')" id="btn-controle-activity" class="tab-btn px-5 py-3 rounded-md font-semibold text-sm transition-all duration-300 flex items-center gap-2 bg-military-900 text-slate-300 hover:bg-military-800 hover:text-white">
                 <i class="fa-solid fa-users-gear text-lg"></i>
                 <span>Controle de Atividade Individual</span>
             </button>
@@ -148,6 +148,11 @@
 
 
         <section id="tab-informacoes-gerais" class="space-y-8">
+            <div id="filtro-info-banner" class="bg-amber-950/20 border border-gold-600/30 p-3 rounded-lg text-xs text-amber-200 flex items-center gap-2 font-mono">
+                <i class="fa-solid fa-circle-info text-gold-400"></i>
+                <span>Métricas globais e quadrantes baseados exclusivamente na <strong>auditoria mais recente (<span id="span-auditoria-data">Nenhum registo</span>)</strong> para os membros atualmente <strong>Ativos (ON)</strong>.</span>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 
                 <div class="bg-gradient-to-br from-military-900 to-black border border-gold-900/30 p-5 rounded-xl relative overflow-hidden group hover:border-gold-500/50 transition-all">
@@ -156,7 +161,7 @@
                     </div>
                     <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Média de Poder</span>
                     <span id="metric-media-poder" class="text-3xl font-black text-white mt-1 block font-mono">0</span>
-                    <span class="text-[10px] text-slate-500 block mt-2">Média global de todos os registros</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Média da auditoria ativa mais recente</span>
                 </div>
 
                 <div class="bg-gradient-to-br from-military-900 to-black border border-gold-900/30 p-5 rounded-xl relative overflow-hidden group hover:border-gold-500/50 transition-all">
@@ -165,7 +170,7 @@
                     </div>
                     <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Doação Semanal Média</span>
                     <span id="metric-media-doacao" class="text-3xl font-black text-gold-400 mt-1 block font-mono">0</span>
-                    <span class="text-[10px] text-slate-500 block mt-2">Média de contribuição na aliança</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Média de contribuição na auditoria ativa</span>
                 </div>
 
                 <div class="bg-gradient-to-br from-military-900 to-black border-2 border-red-900/40 p-5 rounded-xl relative overflow-hidden group hover:border-red-500/50 transition-all">
@@ -176,7 +181,7 @@
                         Nota de Corte <span class="text-[9px] bg-red-950 text-red-400 border border-red-900 px-1 rounded">70%</span>
                     </span>
                     <span id="metric-nota-corte" class="text-3xl font-black text-red-400 mt-1 block font-mono">0</span>
-                    <span class="text-[10px] text-slate-500 block mt-2">Poder mínimo sugerido para recrutamento</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Poder mínimo com base na auditoria ativa</span>
                 </div>
 
                 <div class="bg-gradient-to-br from-military-900 to-black border border-gold-900/30 p-5 rounded-xl relative overflow-hidden group hover:border-gold-500/50 transition-all">
@@ -185,7 +190,7 @@
                     </div>
                     <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Meta de Entrada</span>
                     <span id="metric-cumprem-corte" class="text-3xl font-black text-green-400 mt-1 block font-mono">0%</span>
-                    <span class="text-[10px] text-slate-500 block mt-2">Dos membros ativos cumprem a Nota de Corte</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Dos ativos cumprem a Nota de Corte hoje</span>
                 </div>
 
                 <div class="bg-gradient-to-br from-military-900 to-black border border-gold-900/30 p-5 rounded-xl relative overflow-hidden group hover:border-gold-500/50 transition-all">
@@ -194,7 +199,7 @@
                     </div>
                     <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Membros Ativos (ON)</span>
                     <span id="metric-ativos-on" class="text-3xl font-black text-blue-400 mt-1 block font-mono">0 / 0</span>
-                    <span class="text-[10px] text-slate-500 block mt-2">Jogadores ativos atualmente no quadro</span>
+                    <span class="text-[10px] text-slate-500 block mt-2">Membros ativos com recolhas feitas</span>
                 </div>
             </div>
 
@@ -202,9 +207,9 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div>
                         <h2 class="text-xl font-accent font-black text-gold-400 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-chart-pie"></i> Distribuição por Quadrantes de Desempenho
+                            <i class="fa-solid fa-chart-pie"></i> Distribuição por Quadrantes de Desempenho (Recente)
                         </h2>
-                        <p class="text-xs text-slate-400">Classificação tática baseada em Poder e Doação relativos à média atual.</p>
+                        <p class="text-xs text-slate-400">Classificação tática baseada em Poder e Doação relativos à média da auditoria ativa mais recente.</p>
                     </div>
                     <div class="flex flex-wrap gap-2 text-[10px] bg-military-950 p-2 rounded border border-gold-900/20">
                         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Alta Perf.</span>
@@ -361,13 +366,13 @@
             </div>
         </section>
 
-        <section id="tab-controle-atividade" class="hidden space-y-6">
+        <section id="tab-controle-activity" class="hidden space-y-6">
             <div class="bg-military-900/30 border border-gold-950 p-5 rounded-xl">
                 <h2 class="text-xl font-accent font-black text-gold-400 uppercase tracking-wider mb-2">
                     <i class="fa-solid fa-address-book"></i> Ficha Individual Cumulativa dos Combatentes
                 </h2>
                 <p class="text-xs text-slate-400 mb-4">
-                    Este painel varre todos os históricos de coletas cadastrados. Ele agrupa as aparições de cada player, computando quantas vezes ele esteve em cada quadrante, indicando seu status atual com base na coleta mais recente.
+                    Este painel varre todos os históricos de coletas cadastrados. Ele agrupa as aparições de cada player, computando quantas vezes esteve em cada quadrante ao longo de todo o histórico da corporação.
                 </p>
 
                 <div class="bg-black/60 border border-gold-950 rounded-xl overflow-hidden shadow-xl">
@@ -376,10 +381,10 @@
                             <thead>
                                 <tr class="bg-military-900 text-gold-400 font-accent uppercase tracking-wider border-b border-gold-950">
                                     <th class="p-4">Nome do Player</th>
-                                    <th class="p-4 text-center bg-emerald-950/30 text-emerald-400">Alta Performance</th>
-                                    <th class="p-4 text-center bg-blue-950/30 text-blue-400">Potencial Crescimento</th>
-                                    <th class="p-4 text-center bg-amber-950/30 text-amber-400">Baixa Doação</th>
-                                    <th class="p-4 text-center bg-rose-950/30 text-rose-400">Baixa Atividade</th>
+                                    <th class="p-4 text-center bg-emerald-950/30 text-emerald-400">Alta Performance (Histórico)</th>
+                                    <th class="p-4 text-center bg-blue-950/30 text-blue-400">Potencial Crescimento (Histórico)</th>
+                                    <th class="p-4 text-center bg-amber-950/30 text-amber-400">Baixa Doação (Histórico)</th>
+                                    <th class="p-4 text-center bg-rose-950/30 text-rose-400">Baixa Atividade (Histórico)</th>
                                     <th class="p-4 text-center">Aparições Totais</th>
                                     <th class="p-4 text-center">Status Atual</th>
                                     <th class="p-4 text-center">Ações</th>
@@ -394,7 +399,7 @@
         </section>
 
         <section id="tab-ferramentas-dados" class="hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 gap-6">
                 <div class="bg-gradient-to-br from-military-900 to-black border border-gold-950 p-6 rounded-xl space-y-4">
                     <h3 class="text-lg font-accent font-bold text-gold-400 uppercase tracking-wider flex items-center gap-2">
                         <i class="fa-solid fa-floppy-disk"></i> Backup & Transferência da Base
@@ -412,20 +417,6 @@
                         </label>
                     </div>
                 </div>
-
-                <div class="bg-gradient-to-br from-military-900 to-black border border-gold-950 p-6 rounded-xl space-y-4">
-                    <h3 class="text-lg font-accent font-bold text-red-400 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-circle-exclamation text-red-500"></i> Área de Reset
-                    </h3>
-                    <p class="text-xs text-slate-400">
-                        Deseja limpar totalmente o histórico atual da sessão e iniciar com a aliança BaR em branco? (Apenas para Administradores)
-                    </p>
-                    <div class="pt-2">
-                        <button id="btn-limpar-dados" onclick="confirmarLimpezaDados()" class="bg-red-950/50 hover:bg-red-900 text-red-300 border border-red-800 text-xs font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <i class="fa-solid fa-trash-can"></i> Limpar Todo o Histórico da Aliança
-                        </button>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -436,7 +427,7 @@
                         <h2 class="text-xl font-accent font-black text-gold-400 uppercase tracking-wider flex items-center gap-2">
                             <i class="fa-solid fa-calendar-days"></i> Presença em Eventos Oficiais
                         </h2>
-                        <p class="text-xs text-slate-400">Teixeira (R4) pode gerenciar a chamada e participação dos combatentes.</p>
+                        <p class="text-xs text-slate-400">Teixeira (R4) pode gerenciar a chamada e participação dos combatentes ativos.</p>
                     </div>
                     <button id="btn-novo-evento" onclick="toggleEventoModal(true)" class="bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-500 hover:to-gold-600 text-black font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-2 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         <i class="fa-solid fa-calendar-plus"></i> Novo Evento
@@ -585,26 +576,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DO RESET COMPLETO -->
-    <div id="modal-confirm-reset" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-military-950 border-2 border-red-700 rounded-xl w-full max-w-sm overflow-hidden p-6 shadow-2xl">
-            <h3 class="font-accent font-bold text-red-400 uppercase tracking-widest text-sm mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-triangle-exclamation"></i> Limpar Todo o Histórico
-            </h3>
-            <p class="text-xs text-slate-300 mb-6">
-                Atenção, General: Tem certeza de que deseja apagar permanentemente todo o histórico de coletas desta sessão e começar do zero? Essa ação não pode ser desfeita.
-            </p>
-            <div class="flex justify-end gap-2 text-xs">
-                <button onclick="toggleResetModal(false)" class="bg-military-900 hover:bg-military-850 text-slate-300 font-semibold px-4 py-2 rounded-lg">
-                    Cancelar
-                </button>
-                <button onclick="executarLimpezaDados()" class="bg-red-800 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg">
-                    Confirmar Reset
-                </button>
-            </div>
-        </div>
-    </div>
-
+    <!-- MODAL DO EVENTO -->
     <div id="modal-form-evento" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-military-950 border-2 border-gold-600 rounded-xl w-full max-w-sm overflow-hidden shadow-[0_0_50px_rgba(218,138,19,0.4)]">
             <div class="bg-gradient-to-r from-military-900 via-beer-dark to-military-900 p-4 border-b border-gold-950 flex items-center justify-between">
@@ -658,15 +630,8 @@
             if (formInputDate) {
                 formInputDate.value = hoje;
             }
-            
-            // Formatando data atual para cabeçalho em português
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const headerDataEl = document.getElementById('header-data-atual');
-            if (headerDataEl) {
-                headerDataEl.innerText = new Date().toLocaleDateString('pt-PT', options);
-            }
 
-            // Carrega prioritariamente o ficheiro infos.json
+            // Carrega prioritariamente o ficheiro infos.json se disponível
             fetch('./infos.json')
                 .then(response => {
                     if (!response.ok) {
@@ -691,7 +656,14 @@
                     inicializarInterface();
                 })
                 .catch(error => {
-                    console.warn(error.message + ' -> Inicializando painel com dados locais.');
+                    console.warn(error.message + ' -> Inicializando painel vazio ou com dados locais.');
+                    // Tenta restaurar cache local caso já tenha alterado e feito importação prévia
+                    const backupLocal = localStorage.getItem('BaR_dbColetas_backup');
+                    if (backupLocal) {
+                        try {
+                            dbColetas = JSON.parse(backupLocal);
+                        } catch(e) {}
+                    }
                     inicializarInterface();
                 });
         };
@@ -702,6 +674,11 @@
             renderDatabaseTable();
             renderAtividadeIndividual();
             atualizarControlesEdicao();
+        }
+
+        // Guardar alterações localmente se alteradas
+        function salvarEstadoLocal() {
+            localStorage.setItem('BaR_dbColetas_backup', JSON.stringify(dbColetas));
         }
 
         // ================= SISTEMA DE SEGURANÇA E ADM =================
@@ -735,6 +712,7 @@
             }
         }
 
+        // Fecha modal de senha
         function fecharModalSenha() {
             const modalSenha = document.getElementById('modal-senha-admin');
             if (modalSenha) modalSenha.classList.add('hidden');
@@ -770,7 +748,6 @@
             const btnNovo = document.getElementById('btn-novo-registro');
             const btnImportWrapper = document.getElementById('btn-import-wrapper');
             const fileInput = document.getElementById('import-file');
-            const btnLimpar = document.getElementById('btn-limpar-dados');
             const btnNovoEvento = document.getElementById('btn-novo-evento');
 
             if (isAdmin) {
@@ -785,7 +762,6 @@
                 if (btnNovo) btnNovo.removeAttribute('disabled');
                 if (btnImportWrapper) btnImportWrapper.classList.remove('opacity-50', 'cursor-not-allowed');
                 if (fileInput) fileInput.removeAttribute('disabled');
-                if (btnLimpar) btnLimpar.removeAttribute('disabled');
                 if (btnNovoEvento) btnNovoEvento.removeAttribute('disabled');
             } else {
                 // Modo Apenas Leitura
@@ -799,7 +775,6 @@
                 if (btnNovo) btnNovo.setAttribute('disabled', 'true');
                 if (btnImportWrapper) btnImportWrapper.classList.add('opacity-50', 'cursor-not-allowed');
                 if (fileInput) fileInput.setAttribute('disabled', 'true');
-                if (btnLimpar) btnLimpar.setAttribute('disabled', 'true');
                 if (btnNovoEvento) btnNovoEvento.setAttribute('disabled', 'true');
             }
         }
@@ -809,7 +784,7 @@
             // Oculta todas as seções
             const tabGerais = document.getElementById('tab-informacoes-gerais');
             const tabDetalhada = document.getElementById('tab-base-detalhada');
-            const tabAtividade = document.getElementById('tab-controle-atividade');
+            const tabAtividade = document.getElementById('tab-controle-activity');
             const tabFerramentas = document.getElementById('tab-ferramentas-dados');
             const tabEventos = document.getElementById('tab-controle-eventos');
 
@@ -842,7 +817,7 @@
                 recalcularPainelEstatistico();
             } else if (tabId === 'base-detalhada') {
                 renderDatabaseTable();
-            } else if (tabId === 'controle-atividade') {
+            } else if (tabId === 'controle-activity') {
                 renderAtividadeIndividual();
             } else if (tabId === 'controle-eventos') {
                 renderizarEventos();
@@ -867,7 +842,7 @@
             const toast = document.getElementById('toast-msg');
             const txt = document.getElementById('toast-text');
             if (toast && txt) {
-                txt.innerText = mensagem;
+                txt.innerText = messageClean = mensagem;
                 toast.classList.remove('hidden');
                 setTimeout(() => {
                     toast.classList.add('hidden');
@@ -877,17 +852,24 @@
 
         // ================= PROCESSAMENTO DE DADOS (CÁLCULOS PRINCIPAIS) =================
 
-        // Encontra o registro de data mais recente cadastrado para termos o panorama da "aliança hoje"
-        function obterUltimaDataColeta() {
-            if (dbColetas.length === 0) return null;
-            return dbColetas.reduce((max, r) => r.data > max ? r.data : max, dbColetas[0].data);
+        /**
+         * NOVA REGRA: Determina a data da auditoria mais recente considerando apenas os membros ativos (ON).
+         * Um membro é ativo quando não possui demissão/saída registada (demissao em branco).
+         */
+        function obterUltimaDataColetaAtivos() {
+            // Filtra membros ativos
+            const ativos = dbColetas.filter(r => !r.demissao);
+            if (ativos.length === 0) return null;
+            // Retorna a maior data de recolha
+            return ativos.reduce((max, r) => r.data > max ? r.data : max, ativos[0].data);
         }
 
-        // Retorna a lista de players com sua última coleta realizada (Membro Ativo se não houver data de demissão)
+        /**
+         * Obtém a lista dos últimos registos de cada jogador para sabermos as estatísticas acumuladas do panorama geral.
+         */
         function obterMembrosNoPanoramaAtual() {
             if (dbColetas.length === 0) return [];
             
-            // Agrupar registros por jogador e pegar o mais recente com base na data de coleta
             const playerUltimoRegistro = {};
             dbColetas.forEach(r => {
                 if (!playerUltimoRegistro[r.nome] || r.data > playerUltimoRegistro[r.nome].data) {
@@ -896,36 +878,6 @@
             });
 
             return Object.values(playerUltimoRegistro);
-        }
-
-        // Calcula as médias e as notas com base nos players ativos (ON) no panorama de coletas atual
-        function calcularMetricasAtuais(membrosAtuais) {
-            // Consideramos apenas membros ativos atualmente (sem data de demissão cadastrada)
-            const membrosAtivos = membrosAtuais.filter(m => !m.demissao);
-
-            const totalAtivos = membrosAtivos.length;
-            if (totalAtivos === 0) {
-                return { mediaPoder: 0, mediaDoacao: 0, notaCorte: 0, pctCumpremCorte: 0, totalAtivos: 0 };
-            }
-
-            const somaPoder = membrosAtivos.reduce((acc, curr) => acc + Number(curr.poder), 0);
-            const somaDoacao = membrosAtivos.reduce((acc, curr) => acc + Number(curr.doacao), 0);
-
-            const mediaPoder = Math.round(somaPoder / totalAtivos);
-            const mediaDoacao = Math.round(somaDoacao / totalAtivos);
-            const notaCorte = Math.round(mediaPoder * 0.70);
-
-            // Quantos cumprem a nota de corte (poder >= notaCorte)
-            const cumpremCorte = membrosAtivos.filter(m => Number(m.poder) >= notaCorte).length;
-            const pctCumpremCorte = Math.round((cumpremCorte / totalAtivos) * 100);
-
-            return {
-                mediaPoder,
-                mediaDoacao,
-                notaCorte,
-                pctCumpremCorte,
-                totalAtivos
-            };
         }
 
         // Determinar Quadrante de um jogador com base em seu poder/doação comparado à média
@@ -947,34 +899,67 @@
 
         // ================= RENDERIZAÇÕES DO DASHBOARD =================
         function recalcularPainelEstatistico() {
-            const todosPanorama = obterMembrosNoPanoramaAtual();
-            const ativosOn = todosPanorama.filter(m => !m.demissao);
-            const metricas = calcularMetricasAtuais(todosPanorama);
+            const dataRecenteAtivos = obterUltimaDataColetaAtivos();
+            
+            // Exibir a data do filtro no topo
+            const spanDataAuditoria = document.getElementById('span-auditoria-data');
+            if (spanDataAuditoria) {
+                spanDataAuditoria.innerText = dataRecenteAtivos ? formatarData(dataRecenteAtivos) : "Nenhum registo ativo";
+            }
+
+            // Filtrar apenas registos pertencentes aos ativos (ON) na auditoria mais recente
+            const ativosAuditoriaRecente = dbColetas.filter(r => {
+                return !r.demissao && r.data === dataRecenteAtivos;
+            });
+
+            const totalAtivos = ativosAuditoriaRecente.length;
+
+            // Variáveis de métricas
+            let mediaPoder = 0;
+            let mediaDoacao = 0;
+            let notaCorte = 0;
+            let pctCumpremCorte = 0;
+
+            if (totalAtivos > 0) {
+                const somaPoder = ativosAuditoriaRecente.reduce((acc, curr) => acc + Number(curr.poder), 0);
+                const somaDoacao = ativosAuditoriaRecente.reduce((acc, curr) => acc + Number(curr.doacao), 0);
+
+                mediaPoder = Math.round(somaPoder / totalAtivos);
+                mediaDoacao = Math.round(somaDoacao / totalAtivos);
+                notaCorte = Math.round(mediaPoder * 0.70);
+
+                const cumpremCorte = ativosAuditoriaRecente.filter(m => Number(m.poder) >= notaCorte).length;
+                pctCumpremCorte = Math.round((cumpremCorte / totalAtivos) * 100);
+            }
 
             // Preenche cards de forma segura
-            const totalMembrosHeader = document.getElementById('header-total-membros');
-            if (totalMembrosHeader) totalMembrosHeader.innerText = ativosOn.length;
-
             const mediaPoderCard = document.getElementById('metric-media-poder');
-            if (mediaPoderCard) mediaPoderCard.innerText = formatarNumero(metricas.mediaPoder);
+            if (mediaPoderCard) mediaPoderCard.innerText = formatarNumero(mediaPoder);
 
             const mediaDoacaoCard = document.getElementById('metric-media-doacao');
-            if (mediaDoacaoCard) mediaDoacaoCard.innerText = formatarNumero(metricas.mediaDoacao);
+            if (mediaDoacaoCard) mediaDoacaoCard.innerText = formatarNumero(mediaDoacao);
 
             const notaCorteCard = document.getElementById('metric-nota-corte');
-            if (notaCorteCard) notaCorteCard.innerText = formatarNumero(metricas.notaCorte);
+            if (notaCorteCard) notaCorteCard.innerText = formatarNumero(notaCorte);
 
             const cumpremCorteCard = document.getElementById('metric-cumprem-corte');
-            if (cumpremCorteCard) cumpremCorteCard.innerText = `${metricas.pctCumpremCorte}%`;
+            if (cumpremCorteCard) cumpremCorteCard.innerText = `${pctCumpremCorte}%`;
+
+            // Conta total de membros no panorama atual
+            const todosPanorama = obterMembrosNoPanoramaAtual();
+            const totalAtivosGerais = todosPanorama.filter(m => !m.demissao).length;
+
+            const totalMembrosHeader = document.getElementById('header-total-membros');
+            if (totalMembrosHeader) totalMembrosHeader.innerText = totalAtivosGerais;
 
             const ativosOnCard = document.getElementById('metric-ativos-on');
-            if (ativosOnCard) ativosOnCard.innerText = `${ativosOn.length} / ${todosPanorama.length}`;
+            if (ativosOnCard) ativosOnCard.innerText = `${totalAtivos} / ${totalAtivosGerais}`;
 
             // Atualiza spans flutuantes do corte nas explicações
             const corteSpans = document.querySelectorAll('.corte-span');
-            corteSpans.forEach(s => s.innerText = formatarNumero(metricas.notaCorte));
+            corteSpans.forEach(s => s.innerText = formatarNumero(notaCorte));
 
-            // Filtrar e preencher Listagens dos Quadrantes para Membros ON
+            // Filtrar e preencher Listagens dos Quadrantes para Membros ON da auditoria recente
             const listas = {
                 1: { id: "list-alta-performance", countId: "quad-alta-count", html: "" },
                 2: { id: "list-potencial-crescimento", countId: "quad-potencial-count", html: "" },
@@ -984,9 +969,9 @@
 
             const contadores = { 1: 0, 2: 0, 3: 0, 4: 0 };
 
-            // Classifica os ativos
-            ativosOn.forEach(m => {
-                const quad = calcularQuadrante(m.poder, m.doacao, metricas.mediaPoder, metricas.mediaDoacao);
+            // Classifica apenas os elementos pertencentes à auditoria recente dos ativos
+            ativosAuditoriaRecente.forEach(m => {
+                const quad = calcularQuadrante(m.poder, m.doacao, mediaPoder, mediaDoacao);
                 contadores[quad.num]++;
                 
                 listas[quad.num].html += `
@@ -1011,15 +996,15 @@
                 const listEl = document.getElementById(listas[num].id);
                 if (listEl) {
                     if (listas[num].html === "") {
-                        listEl.innerHTML = `<p class="text-slate-600 italic text-center py-4">Nenhum guerreiro ativo neste quadrante.</p>`;
+                        listEl.innerHTML = `<p class="text-slate-600 italic text-center py-4 text-xs">Nenhum guerreiro ativo registado na última auditoria.</p>`;
                     } else {
                         listEl.innerHTML = listas[num].html;
                     }
                 }
             });
 
-            // Lista Alerta de Inativos
-            const inativos = ativosOn.filter(m => Number(m.offline) >= 1).sort((a, b) => b.offline - a.offline);
+            // Alerta de Inatividade: Aplica-se aos membros ativos em geral que possuem tempo offline
+            const inativos = todosPanorama.filter(m => !m.demissao && Number(m.offline) >= 1).sort((a, b) => b.offline - a.offline);
             const containerInativos = document.getElementById('lista-inativos');
             
             if (containerInativos) {
@@ -1064,8 +1049,20 @@
             
             tbody.innerHTML = "";
 
-            const todosPanorama = obterMembrosNoPanoramaAtual();
-            const metricas = calcularMetricasAtuais(todosPanorama);
+            // O cálculo das médias na tabela detalhada também usa as estatísticas da auditoria ativa mais recente para fins de classificação
+            const dataRecenteAtivos = obterUltimaDataColetaAtivos();
+            const ativosAuditoriaRecente = dbColetas.filter(r => !r.demissao && r.data === dataRecenteAtivos);
+            const totalAtivos = ativosAuditoriaRecente.length;
+
+            let mediaPoder = 0;
+            let mediaDoacao = 0;
+
+            if (totalAtivos > 0) {
+                const somaPoder = ativosAuditoriaRecente.reduce((acc, curr) => acc + Number(curr.poder), 0);
+                const somaDoacao = ativosAuditoriaRecente.reduce((acc, curr) => acc + Number(curr.doacao), 0);
+                mediaPoder = Math.round(somaPoder / totalAtivos);
+                mediaDoacao = Math.round(somaDoacao / totalAtivos);
+            }
 
             // Filtros aplicados na base completa de coletas
             let registrosFiltrados = dbColetas.filter(r => {
@@ -1101,7 +1098,8 @@
             }
 
             registrosFiltrados.forEach(r => {
-                const quad = calcularQuadrante(r.poder, r.doacao, metricas.mediaPoder, metricas.mediaDoacao);
+                // Classificação utiliza os valores dinâmicos globais ativos do dia recente
+                const quad = calcularQuadrante(r.poder, r.doacao, mediaPoder, mediaDoacao);
                 
                 let rowBgStyle = "hover:bg-slate-900/40 transition-colors";
                 let badgeClass = "";
@@ -1164,7 +1162,7 @@
         }
 
 
-        // ================= ATIVIDADE INDIVIDUAL =================
+        // ================= ATIVIDADE INDIVIDUAL (FICHA CUMULATIVA) =================
         function renderAtividadeIndividual() {
             const tbody = document.getElementById('individual-table-body');
             if (!tbody) return;
@@ -1176,10 +1174,21 @@
                 return;
             }
 
-            const todosPanorama = obterMembrosNoPanoramaAtual();
-            const metricas = calcularMetricasAtuais(todosPanorama);
+            const dataRecenteAtivos = obterUltimaDataColetaAtivos();
+            const ativosAuditoriaRecente = dbColetas.filter(r => !r.demissao && r.data === dataRecenteAtivos);
+            const totalAtivos = ativosAuditoriaRecente.length;
 
-            // Agrupa e conta aparições por jogador
+            let mediaPoder = 0;
+            let mediaDoacao = 0;
+
+            if (totalAtivos > 0) {
+                const somaPoder = ativosAuditoriaRecente.reduce((acc, curr) => acc + Number(curr.poder), 0);
+                const somaDoacao = ativosAuditoriaRecente.reduce((acc, curr) => acc + Number(curr.doacao), 0);
+                mediaPoder = Math.round(somaPoder / totalAtivos);
+                mediaDoacao = Math.round(somaDoacao / totalAtivos);
+            }
+
+            // Agrupa e conta aparições históricas por jogador (Preservando todo o histórico completo!)
             const fichaPlayers = {};
 
             dbColetas.forEach(r => {
@@ -1200,7 +1209,8 @@
                     fichaPlayers[nome].ultimoRegistro = r;
                 }
 
-                const quad = calcularQuadrante(r.poder, r.doacao, metricas.mediaPoder, metricas.mediaDoacao);
+                // A classificação das aparições históricas também é baseada na régua atualizada
+                const quad = calcularQuadrante(r.poder, r.doacao, mediaPoder, mediaDoacao);
                 fichaPlayers[nome][`quad${quad.num}`]++;
                 fichaPlayers[nome].totalColetas++;
             });
@@ -1246,7 +1256,7 @@
             });
         }
 
-        // Alterna rapidamente o status
+        // Alterna rapidamente o status de admissão ou demissão de um jogador
         function alternarStatusFicha(nome) {
             if (!isAdmin) {
                 showToast("Acesso Negado: Ative o Modo de Edição primeiro!");
@@ -1269,6 +1279,7 @@
                     maisRecente.demissao = maisRecente.data;
                     showToast(`${nome} marcado como inativo/demitido.`);
                 }
+                salvarEstadoLocal();
                 renderAtividadeIndividual();
                 recalcularPainelEstatistico();
                 renderDatabaseTable();
@@ -1331,7 +1342,7 @@
                     dbColetas[index] = {
                         id, data, rank, nome, nivel, poder, doacao, offline, admissao, demissao
                     };
-                    showToast("Registo updated!");
+                    showToast("Registo atualizado com sucesso!");
                 }
             } else {
                 const novoReg = {
@@ -1342,6 +1353,7 @@
                 showToast("Novo registo adicionado!");
             }
 
+            salvarEstadoLocal();
             toggleFormModal(false);
             
             recalcularPainelEstatistico();
@@ -1401,6 +1413,7 @@
             if (registroIdParaDeletar) {
                 dbColetas = dbColetas.filter(r => r.id !== registroIdParaDeletar);
                 showToast("Coleta excluída da base de dados!");
+                salvarEstadoLocal();
                 toggleDeleteModal(false);
                 
                 recalcularPainelEstatistico();
@@ -1410,46 +1423,8 @@
         }
 
 
-        // ================= OPERAÇÕES DE RESET (CUSTOM MODAL) =================
-        function confirmarLimpezaDados() {
-            if (!isAdmin) {
-                showToast("Acesso Negado: Ative o Modo de Edição!");
-                return;
-            }
-            toggleResetModal(true);
-        }
-
-        function toggleResetModal(show) {
-            const modal = document.getElementById('modal-confirm-reset');
-            if (modal) {
-                if (show) {
-                    modal.classList.remove('hidden');
-                } else {
-                    modal.classList.add('hidden');
-                }
-            }
-        }
-
-        function executarLimpezaDados() {
-            if (!isAdmin) return;
-            dbColetas = [];
-            dbEventos = [];
-            localStorage.removeItem('BaR_dbEventos');
-            showToast("Todos os dados da sessão foram limpos.");
-            toggleResetModal(false);
-            
-            recalcularPainelEstatistico();
-            renderDatabaseTable();
-            renderAtividadeIndividual();
-            if (!document.getElementById('tab-controle-eventos').classList.contains('hidden')) {
-                renderizarEventos();
-            }
-        }
-
-
         // ================= BACKUP & IMPORTAÇÃO DE DADOS =================
         function exportarDados() {
-            // Qualquer usuário pode exportar a base estratégica atual para download
             const exportObj = {
                 coletas: dbColetas,
                 eventos: dbEventos
@@ -1489,6 +1464,7 @@
                         return;
                     }
                     
+                    salvarEstadoLocal();
                     recalcularPainelEstatistico();
                     renderDatabaseTable();
                     renderAtividadeIndividual();
@@ -1536,7 +1512,7 @@
                 id: crypto.randomUUID(),
                 nome: nome,
                 horario: horario,
-                presencas: [] // Array contendo nome dos combatentes presentes
+                presencas: [] 
             };
 
             dbEventos.push(novoEvt);
@@ -1682,4 +1658,4 @@
         }
     </script>
 </body>
-</html>
+                            </html>
