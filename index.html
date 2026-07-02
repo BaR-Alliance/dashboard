@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
@@ -542,7 +541,7 @@
                 <div>
                     <label class="block text-slate-400 font-semibold mb-1">Data de Demissão / Saída (Opcional)</label>
                     <input type="date" id="form-demissao" class="w-full bg-black/60 border border-gold-900/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-gold-500">
-                    <p class="text-[10px] text-slate-500 mt-1">Deixe em branco caso o jogador ainda seja ativo (ON).</p>
+                    <p class="text-[10px] text-slate-500 mt-1">Opcional. Se deixado em branco, o sistema calculará a demissão automaticamente caso o player deixe de aparecer nas últimas coletas.</p>
                 </div>
 
                 <div class="pt-4 border-t border-gold-950 flex justify-end gap-2">
@@ -843,7 +842,7 @@
             const toast = document.getElementById('toast-msg');
             const txt = document.getElementById('toast-text');
             if (toast && txt) {
-                txt.innerText = messageClean = mensagem;
+                txt.innerText = mensagem;
                 toast.classList.remove('hidden');
                 setTimeout(() => {
                     toast.classList.add('hidden');
@@ -854,15 +853,47 @@
         // ================= PROCESSAMENTO DE DADOS (CÁLCULOS PRINCIPAIS) =================
 
         /**
-         * NOVA REGRA: Determina a data da auditoria mais recente considerando apenas os membros ativos (ON).
-         * Um membro é ativo quando não possui demissão/saída registada (demissao em branco).
+         * Encontra a maior data global de coleta cadastrada na base de dados.
          */
-        function obterUltimaDataColetaAtivos() {
-            // Filtra membros ativos
-            const ativos = dbColetas.filter(r => !r.demissao);
-            if (ativos.length === 0) return null;
-            // Retorna a maior data de recolha
-            return ativos.reduce((max, r) => r.data > max ? r.data : max, ativos[0].data);
+        function obterDataMaisRecenteGlobal() {
+            if (dbColetas.length === 0) return null;
+            return dbColetas.reduce((max, r) => r.data > max ? r.data : max, dbColetas[0].data);
+        }
+
+        /**
+         * NOVO FLUXO DE DETECÇÃO AUTOMÁTICA DE DEMISSÃO:
+         * Um jogador é considerado Ativo (ON) se ele possuir uma coleta registada na última data de auditoria global disponível
+         * E não tiver sido marcado explicitamente com uma data de demissão manual.
+         * Caso contrário, se a sua última aparição foi em um ciclo anterior, ele é considerado Demitido (OFF).
+         * A data de demissão calculada será a data de sua última coleta na base de dados.
+         */
+        function processarMembroStatus(membroNome, ultimoReg) {
+            const dataMaisRecenteGlobal = obterDataMaisRecenteGlobal();
+            
+            // Se o usuário especificou manualmente uma data de demissão
+            if (ultimoReg.demissao) {
+                return {
+                    ativo: false,
+                    dataDemissao: ultimoReg.demissao,
+                    metodo: 'manual'
+                };
+            }
+
+            // Se o último registro de coleta do jogador NÃO for da última data coletada do sistema
+            if (dataMaisRecenteGlobal && ultimoReg.data < dataMaisRecenteGlobal) {
+                return {
+                    ativo: false,
+                    dataDemissao: ultimoReg.data, // A data de demissão vira automaticamente a última aparição registrada
+                    metodo: 'auto'
+                };
+            }
+
+            // Caso ele esteja na coleta mais recente e sem flags de saída
+            return {
+                ativo: true,
+                dataDemissao: "",
+                metodo: 'ativo'
+            };
         }
 
         /**
@@ -900,7 +931,7 @@
 
         // ================= RENDERIZAÇÕES DO DASHBOARD =================
         function recalcularPainelEstatistico() {
-            const dataRecenteAtivos = obterUltimaDataColetaAtivos();
+            const dataRecenteAtivos = obterDataMaisRecenteGlobal();
             
             // Exibir a data do filtro no topo
             const spanDataAuditoria = document.getElementById('span-auditoria-data');
@@ -908,9 +939,11 @@
                 spanDataAuditoria.innerText = dataRecenteAtivos ? formatarData(dataRecenteAtivos) : "Nenhum registo ativo";
             }
 
-            // Filtrar apenas registos pertencentes aos ativos (ON) na auditoria mais recente
+            // Jogadores ativos (ON) na auditoria mais recente (não demitidos manualmente e cuja última coleta é a atual global)
+            const todosPanorama = obterMembrosNoPanoramaAtual();
             const ativosAuditoriaRecente = dbColetas.filter(r => {
-                return !r.demissao && r.data === dataRecenteAtivos;
+                const status = processarMembroStatus(r.nome, r);
+                return status.ativo && r.data === dataRecenteAtivos;
             });
 
             const totalAtivos = ativosAuditoriaRecente.length;
@@ -947,8 +980,10 @@
             if (cumpremCorteCard) cumpremCorteCard.innerText = `${pctCumpremCorte}%`;
 
             // Conta total de membros no panorama atual
-            const todosPanorama = obterMembrosNoPanoramaAtual();
-            const totalAtivosGerais = todosPanorama.filter(m => !m.demissao).length;
+            const totalAtivosGerais = todosPanorama.filter(m => {
+                const status = processarMembroStatus(m.nome, m);
+                return status.ativo;
+            }).length;
 
             const totalMembrosHeader = document.getElementById('header-total-membros');
             if (totalMembrosHeader) totalMembrosHeader.innerText = totalAtivosGerais;
@@ -1005,7 +1040,11 @@
             });
 
             // Alerta de Inatividade: Aplica-se aos membros ativos em geral que possuem tempo offline
-            const inativos = todosPanorama.filter(m => !m.demissao && Number(m.offline) >= 1).sort((a, b) => b.offline - a.offline);
+            const inativos = todosPanorama.filter(m => {
+                const status = processarMembroStatus(m.nome, m);
+                return status.ativo && Number(m.offline) >= 1;
+            }).sort((a, b) => b.offline - a.offline);
+            
             const containerInativos = document.getElementById('lista-inativos');
             
             if (containerInativos) {
@@ -1050,9 +1089,11 @@
             
             tbody.innerHTML = "";
 
-            // O cálculo das médias na tabela detalhada também usa as estatísticas da auditoria ativa mais recente para fins de classificação
-            const dataRecenteAtivos = obterUltimaDataColetaAtivos();
-            const ativosAuditoriaRecente = dbColetas.filter(r => !r.demissao && r.data === dataRecenteAtivos);
+            const dataRecenteAtivos = obterDataMaisRecenteGlobal();
+            const ativosAuditoriaRecente = dbColetas.filter(r => {
+                const status = processarMembroStatus(r.nome, r);
+                return status.ativo && r.data === dataRecenteAtivos;
+            });
             const totalAtivos = ativosAuditoriaRecente.length;
 
             let mediaPoder = 0;
@@ -1069,11 +1110,16 @@
             let registrosFiltrados = dbColetas.filter(r => {
                 const matchesSearch = r.nome.toLowerCase().includes(query) || r.rank.toLowerCase().includes(query);
                 
+                // Mapear se este registro em específico pertence a um jogador ativo no momento
+                // Nota: o status ativo/demitido é do jogador (no panorama mais atual), não do registro isolado.
+                const jogadorNoPanorama = obterMembrosNoPanoramaAtual().find(p => p.nome === r.nome);
+                const statusJogador = jogadorNoPanorama ? processarMembroStatus(r.nome, jogadorNoPanorama) : { ativo: true };
+
                 let matchesStatus = true;
                 if (filterStatus === 'on') {
-                    matchesStatus = !r.demissao;
+                    matchesStatus = statusJogador.ativo;
                 } else if (filterStatus === 'off') {
-                    matchesStatus = !!r.demissao;
+                    matchesStatus = !statusJogador.ativo;
                 }
 
                 return matchesSearch && matchesStatus;
@@ -1116,6 +1162,10 @@
                     rowBgStyle += " bg-rose-950/10";
                 }
 
+                // Obtém o panorama do jogador para descobrir se ele está demitido atualmente
+                const jogadorNoPanorama = obterMembrosNoPanoramaAtual().find(p => p.nome === r.nome);
+                const statusMembro = jogadorNoPanorama ? processarMembroStatus(r.nome, jogadorNoPanorama) : { ativo: true, dataDemissao: "" };
+
                 // Renderiza botões de ação se o usuário for Admin, senão exibe um ícone de cadeado
                 let botoesAcaoHtml = "";
                 if (isAdmin) {
@@ -1135,6 +1185,20 @@
                     `;
                 }
 
+                // String informativa sobre a saída
+                let infoDemissaoHtml = "";
+                if (!statusMembro.ativo) {
+                    const tipoTexto = statusMembro.metodo === 'auto' ? "Auto" : "Manual";
+                    infoDemissaoHtml = `
+                        <div class="text-red-400 font-bold font-mono">
+                            ${formatarData(statusMembro.dataDemissao)}
+                            <span class="text-[9px] bg-red-950 border border-red-900 px-1 rounded ml-1 font-normal text-slate-300" title="Demissão identificada automaticamente por ausência nos registros">${tipoTexto}</span>
+                        </div>
+                    `;
+                } else {
+                    infoDemissaoHtml = `<span class="text-[9px] text-emerald-400 font-bold bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-900/50">Ativo</span>`;
+                }
+
                 tbody.innerHTML += `
                     <tr class="${rowBgStyle}">
                         <td class="p-4 flex items-center gap-1.5 justify-center whitespace-nowrap">
@@ -1143,7 +1207,7 @@
                         <td class="p-4 font-mono font-semibold">${formatarData(r.data)}</td>
                         <td class="p-4 font-bold text-slate-200">
                             ${r.nome} 
-                            ${r.demissao ? '<span class="text-[9px] bg-red-950/80 text-red-400 px-1 rounded ml-1 border border-red-900/50">OFF (Saída)</span>' : ''}
+                            ${!statusMembro.ativo ? '<span class="text-[9px] bg-red-950/80 text-red-400 px-1 rounded ml-1 border border-red-900/50">OFF (Saída)</span>' : ''}
                         </td>
                         <td class="p-4"><span class="bg-slate-900 text-slate-300 border border-slate-800 px-1.5 py-0.5 rounded text-[10px] font-bold">${r.rank}</span></td>
                         <td class="p-4 text-right font-mono font-bold">${formatarNumero(r.poder)}</td>
@@ -1156,7 +1220,7 @@
                             </span>
                         </td>
                         <td class="p-4 text-slate-400 font-mono">${formatarData(r.admissao)}</td>
-                        <td class="p-4 text-slate-400 font-mono">${r.demissao ? formatarData(r.demissao) : `<span class="text-[9px] text-emerald-400 font-bold bg-emerald-950/30 px-1 rounded border border-emerald-900/50">Ativo</span>`}</td>
+                        <td class="p-4 text-slate-400 font-mono">${infoDemissaoHtml}</td>
                     </tr>
                 `;
             });
@@ -1175,8 +1239,11 @@
                 return;
             }
 
-            const dataRecenteAtivos = obterUltimaDataColetaAtivos();
-            const ativosAuditoriaRecente = dbColetas.filter(r => !r.demissao && r.data === dataRecenteAtivos);
+            const dataRecenteAtivos = obterDataMaisRecenteGlobal();
+            const ativosAuditoriaRecente = dbColetas.filter(r => {
+                const status = processarMembroStatus(r.nome, r);
+                return status.ativo && r.data === dataRecenteAtivos;
+            });
             const totalAtivos = ativosAuditoriaRecente.length;
 
             let mediaPoder = 0;
@@ -1219,17 +1286,27 @@
             const listado = Object.values(fichaPlayers).sort((a,b) => a.nome.localeCompare(b.nome));
 
             listado.forEach(f => {
-                const statusOn = !f.ultimoRegistro.demissao;
-                const statusBadge = statusOn 
-                    ? `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-900/60 font-bold">ATIVO (ON)</span>`
-                    : `<span class="px-2 py-0.5 rounded text-[10px] bg-red-950 text-red-400 border border-red-900/60 font-bold">REMOVIDO (OFF)</span>`;
+                const statusMembro = processarMembroStatus(f.nome, f.ultimoRegistro);
+                
+                let statusBadge = "";
+                if (statusMembro.ativo) {
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-900/60 font-bold">ATIVO (ON)</span>`;
+                } else {
+                    const descMetodo = statusMembro.metodo === 'auto' ? "Auto" : "Manual";
+                    statusBadge = `
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="px-2 py-0.5 rounded text-[10px] bg-red-950 text-red-400 border border-red-900/60 font-bold">REMOVIDO (OFF)</span>
+                            <span class="text-[9px] text-slate-500 font-mono">Saída: ${formatarData(statusMembro.dataDemissao)} (${descMetodo})</span>
+                        </div>
+                    `;
+                }
 
                 // Renderiza botão se for admin, caso contrário renderiza travado/desativado
                 let botaoStatusHtml = "";
                 if (isAdmin) {
                     botaoStatusHtml = `
-                        <button onclick="alternarStatusFicha('${f.nome}')" class="bg-slate-800 hover:bg-slate-700 text-gold-400 text-[10px] px-2.5 py-1 rounded border border-gold-900/40 transition-all font-semibold">
-                            <i class="fa-solid fa-arrows-rotate mr-1 text-[9px]"></i> Alternar Status
+                        <button onclick="alternarStatusFicha('${f.nome}')" class="bg-slate-800 hover:bg-slate-700 text-gold-400 text-[10px] px-2.5 py-1 rounded border border-gold-900/40 transition-all font-semibold" title="Alterna o status manual de saída para este membro">
+                            <i class="fa-solid fa-arrows-rotate mr-1 text-[9px]"></i> Forçar Status
                         </button>
                     `;
                 } else {
@@ -1257,7 +1334,7 @@
             });
         }
 
-        // Alterna rapidamente o status de admissão ou demissão de um jogador
+        // Alterna rapidamente o status de admissão ou demissão de um jogador (forçar status manualmente)
         function alternarStatusFicha(nome) {
             if (!isAdmin) {
                 showToast("Acesso Negado: Ative o Modo de Edição primeiro!");
@@ -1273,12 +1350,21 @@
             });
 
             if (maisRecente) {
-                if (maisRecente.demissao) {
+                const statusAtual = processarMembroStatus(nome, maisRecente);
+                
+                if (!statusAtual.ativo) {
+                    // Se estava marcado como demitido, limpa a demissão manual e recoloca no ciclo ativo global
                     maisRecente.demissao = "";
-                    showToast(`${nome} readmitido com sucesso!`);
+                    // Se o seu registro mais recente era de um ciclo antigo, trazemos ele para o ciclo atual
+                    const dataMaisRecenteGlobal = obterDataMaisRecenteGlobal();
+                    if (maisRecente.data < dataMaisRecenteGlobal) {
+                        maisRecente.data = dataMaisRecenteGlobal;
+                    }
+                    showToast(`${nome} foi readmitido e marcado como Ativo (ON)!`);
                 } else {
+                    // Se estava ativo, fixa manualmente a data de demissão como a data de sua última coleta
                     maisRecente.demissao = maisRecente.data;
-                    showToast(`${nome} marcado como inativo/demitido.`);
+                    showToast(`${nome} marcado como inativo/demitido manualmente.`);
                 }
                 salvarEstadoLocal();
                 renderAtividadeIndividual();
@@ -1543,7 +1629,10 @@
             const eventosOrdenados = [...dbEventos].sort((a,b) => b.horario.localeCompare(a.horario));
 
             // Obtém combatentes ativos na corporação hoje
-            const combatentesAtivos = obterMembrosNoPanoramaAtual().filter(m => !m.demissao).sort((a,b) => a.nome.localeCompare(b.nome));
+            const combatentesAtivos = obterMembrosNoPanoramaAtual().filter(m => {
+                const status = processarMembroStatus(m.nome, m);
+                return status.ativo;
+            }).sort((a,b) => a.nome.localeCompare(b.nome));
 
             eventosOrdenados.forEach(evt => {
                 const totalMembros = combatentesAtivos.length;
