@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
@@ -361,7 +362,7 @@
                 </div>
                 <div class="bg-military-950/50 p-4 border-t border-gold-950 flex items-center justify-between text-xs text-slate-400">
                     <div id="db-table-info">Mostrando 0 registros de 0</div>
-                    <div class="text-[10px] text-slate-500 italic">Dica: Adicione registros repetidos de um mesmo player com datas diferentes para acumular o histórico dele!</div>
+                    <div class="text-[10px] text-slate-500 italic">Dica: Adicione registros com datas diferentes para acumular o histórico do player! Duplicações no mesmo dia são agrupadas automaticamente.</div>
                 </div>
             </div>
         </section>
@@ -372,7 +373,7 @@
                     <i class="fa-solid fa-address-book"></i> Ficha Individual Cumulativa dos Combatentes
                 </h2>
                 <p class="text-xs text-slate-400 mb-4">
-                    Este painel varre todos os históricos de coletas cadastrados. Ele agrupa as aparições de cada player, computando quantas vezes esteve em cada quadrante ao longo de todo o histórico da corporação.
+                    Este painel varre todos os históricos de coletas cadastrados. Ele agrupa as aparições de cada player, computando de forma cumulativa quantas vezes esteve em cada quadrante de desempenho em toda a história da corporação.
                 </p>
 
                 <div class="bg-black/60 border border-gold-950 rounded-xl overflow-hidden shadow-xl">
@@ -381,10 +382,10 @@
                             <thead>
                                 <tr class="bg-military-900 text-gold-400 font-accent uppercase tracking-wider border-b border-gold-950">
                                     <th class="p-4">Nome do Player</th>
-                                    <th class="p-4 text-center bg-emerald-950/30 text-emerald-400">Alta Performance (Histórico)</th>
-                                    <th class="p-4 text-center bg-blue-950/30 text-blue-400">Potencial Crescimento (Histórico)</th>
-                                    <th class="p-4 text-center bg-amber-950/30 text-amber-400">Baixa Doação (Histórico)</th>
-                                    <th class="p-4 text-center bg-rose-950/30 text-rose-400">Baixa Atividade (Histórico)</th>
+                                    <th class="p-4 text-center bg-emerald-950/30 text-emerald-400">Alta Performance (Acumulado)</th>
+                                    <th class="p-4 text-center bg-blue-950/30 text-blue-400">Potencial Crescimento (Acumulado)</th>
+                                    <th class="p-4 text-center bg-amber-950/30 text-amber-400">Baixa Doação (Acumulado)</th>
+                                    <th class="p-4 text-center bg-rose-950/30 text-rose-400">Baixa Atividade (Acumulado)</th>
                                     <th class="p-4 text-center">Aparições Totais</th>
                                     <th class="p-4 text-center">Status Atual</th>
                                     <th class="p-4 text-center">Ações</th>
@@ -624,7 +625,6 @@
 
         // Ao carregar a página
         window.onload = function() {
-            // Define a data atual nos locais informativos e padrão de formulário
             const hoje = new Date().toISOString().split('T')[0];
             const formInputDate = document.getElementById('form-data');
             if (formInputDate) {
@@ -657,7 +657,6 @@
                 })
                 .catch(error => {
                     console.warn(error.message + ' -> Inicializando painel vazio ou com dados locais.');
-                    // Tenta restaurar cache local caso já tenha alterado e feito importação prévia
                     const backupLocal = localStorage.getItem('BaR_dbColetas_backup');
                     if (backupLocal) {
                         try {
@@ -668,7 +667,6 @@
                 });
         };
 
-        // Função para disparar a renderização após a carga
         function inicializarInterface() {
             recalcularPainelEstatistico();
             renderDatabaseTable();
@@ -676,16 +674,28 @@
             atualizarControlesEdicao();
         }
 
-        // Guardar alterações localmente se alteradas
         function salvarEstadoLocal() {
             localStorage.setItem('BaR_dbColetas_backup', JSON.stringify(dbColetas));
+        }
+
+        // ================= FUNÇÃO ESSENCIAL: DEDUPLICAÇÃO DE REGISTROS =================
+        /**
+         * Retorna os registros de coleta livres de duplicações dentro do mesmo dia/ciclo.
+         * Se um jogador tiver múltiplos registros na mesma data, preserva apenas o mais recente (último inserido).
+         */
+        function obterColetasDeduplicadas() {
+            const uniqueMap = {};
+            dbColetas.forEach(r => {
+                const chave = `${r.nome.trim()}_${r.data}`;
+                uniqueMap[chave] = r; // Sobrescreve mantendo o último registro do array (mais recente)
+            });
+            return Object.values(uniqueMap);
         }
 
         // ================= SISTEMA DE SEGURANÇA E ADM =================
         
         function abrirModalSenha() {
             if (isAdmin) {
-                // Se já for Admin, ao clicar no botão o usuário faz Logout
                 isAdmin = false;
                 showToast("Modo de Edição bloqueado com sucesso!");
                 atualizarControlesEdicao();
@@ -712,7 +722,6 @@
             }
         }
 
-        // Fecha modal de senha
         function fecharModalSenha() {
             const modalSenha = document.getElementById('modal-senha-admin');
             if (modalSenha) modalSenha.classList.add('hidden');
@@ -741,7 +750,6 @@
             }
         }
 
-        // Desabilita, oculta ou altera elementos baseados no estado do Admin
         function atualizarControlesEdicao() {
             const btnToggle = document.getElementById('btn-toggle-admin');
             const statusPermissao = document.getElementById('status-permissao');
@@ -751,7 +759,6 @@
             const btnNovoEvento = document.getElementById('btn-novo-evento');
 
             if (isAdmin) {
-                // Modo Admin Ativo
                 if (btnToggle) {
                     btnToggle.innerHTML = '<i class="fa-solid fa-lock"></i> <span>Bloquear Edição</span>';
                     btnToggle.className = "bg-gradient-to-r from-red-700 to-rose-800 hover:from-red-600 hover:to-rose-700 text-white text-xs font-bold py-2 px-3 rounded-md flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(244,63,94,0.3)]";
@@ -764,7 +771,6 @@
                 if (fileInput) fileInput.removeAttribute('disabled');
                 if (btnNovoEvento) btnNovoEvento.removeAttribute('disabled');
             } else {
-                // Modo Apenas Leitura
                 if (btnToggle) {
                     btnToggle.innerHTML = '<i class="fa-solid fa-key"></i> <span>Ativar Edição</span>';
                     btnToggle.className = "bg-gradient-to-r from-gold-600 to-amber-700 hover:from-gold-500 hover:to-amber-600 text-black text-xs font-bold py-2 px-3 rounded-md flex items-center gap-1.5 transition-all";
@@ -781,7 +787,6 @@
 
         // ================= SISTEMA DE NAVEGAÇÃO DE ABAS =================
         function switchTab(tabId) {
-            // Oculta todas as seções
             const tabGerais = document.getElementById('tab-informacoes-gerais');
             const tabDetalhada = document.getElementById('tab-base-detalhada');
             const tabAtividade = document.getElementById('tab-controle-activity');
@@ -794,25 +799,21 @@
             if (tabFerramentas) tabFerramentas.classList.add('hidden');
             if (tabEventos) tabEventos.classList.add('hidden');
 
-            // Reseta cores dos botões
             const btns = document.querySelectorAll('.tab-btn');
             btns.forEach(btn => {
                 btn.classList.remove('bg-gold-700', 'text-white', 'shadow-lg');
                 btn.classList.add('bg-military-900', 'text-slate-300');
             });
 
-            // Mostra a selecionada
             const targetTab = document.getElementById(`tab-${tabId}`);
             if (targetTab) targetTab.classList.remove('hidden');
 
-            // Destaca botão selecionado
             const activeBtn = document.getElementById(`btn-${tabId}`);
             if (activeBtn) {
                 activeBtn.classList.remove('bg-military-900', 'text-slate-300');
                 activeBtn.classList.add('bg-gold-700', 'text-white', 'shadow-lg');
             }
 
-            // Ações extras ao trocar de aba para garantir dados novos
             if (tabId === 'informacoes-gerais') {
                 recalcularPainelEstatistico();
             } else if (tabId === 'base-detalhada') {
@@ -824,7 +825,7 @@
             }
         }
 
-        // ================= AUXILIARES DE FORMATAÇÃO E MOEDA =================
+        // ================= AUXILIARES DE FORMATAÇÃO =================
         function formatarNumero(num) {
             return Number(num).toLocaleString('pt-PT');
         }
@@ -837,12 +838,11 @@
             return `${dia}/${mes}/${ano}`;
         }
 
-        // Exibir mensagem na tela (Toast)
         function showToast(mensagem) {
             const toast = document.getElementById('toast-msg');
             const txt = document.getElementById('toast-text');
             if (toast && txt) {
-                txt.innerText = mensagem;
+                txt.innerText = message = mensagem;
                 toast.classList.remove('hidden');
                 setTimeout(() => {
                     toast.classList.add('hidden');
@@ -852,25 +852,15 @@
 
         // ================= PROCESSAMENTO DE DADOS (CÁLCULOS PRINCIPAIS) =================
 
-        /**
-         * Encontra a maior data global de coleta cadastrada na base de dados.
-         */
         function obterDataMaisRecenteGlobal() {
-            if (dbColetas.length === 0) return null;
-            return dbColetas.reduce((max, r) => r.data > max ? r.data : max, dbColetas[0].data);
+            const coletas = obterColetasDeduplicadas();
+            if (coletas.length === 0) return null;
+            return coletas.reduce((max, r) => r.data > max ? r.data : max, coletas[0].data);
         }
 
-        /**
-         * NOVO FLUXO DE DETECÇÃO AUTOMÁTICA DE DEMISSÃO:
-         * Um jogador é considerado Ativo (ON) se ele possuir uma coleta registada na última data de auditoria global disponível
-         * E não tiver sido marcado explicitamente com uma data de demissão manual.
-         * Caso contrário, se a sua última aparição foi em um ciclo anterior, ele é considerado Demitido (OFF).
-         * A data de demissão calculada será a data de sua última coleta na base de dados.
-         */
         function processarMembroStatus(membroNome, ultimoReg) {
             const dataMaisRecenteGlobal = obterDataMaisRecenteGlobal();
             
-            // Se o usuário especificou manualmente uma data de demissão
             if (ultimoReg.demissao) {
                 return {
                     ativo: false,
@@ -879,16 +869,14 @@
                 };
             }
 
-            // Se o último registro de coleta do jogador NÃO for da última data coletada do sistema
             if (dataMaisRecenteGlobal && ultimoReg.data < dataMaisRecenteGlobal) {
                 return {
                     ativo: false,
-                    dataDemissao: ultimoReg.data, // A data de demissão vira automaticamente a última aparição registrada
+                    dataDemissao: ultimoReg.data,
                     metodo: 'auto'
                 };
             }
 
-            // Caso ele esteja na coleta mais recente e sem flags de saída
             return {
                 ativo: true,
                 dataDemissao: "",
@@ -896,15 +884,13 @@
             };
         }
 
-        /**
-         * Obtém a lista dos últimos registos de cada jogador para sabermos as estatísticas acumuladas do panorama geral.
-         */
         function obterMembrosNoPanoramaAtual() {
-            if (dbColetas.length === 0) return [];
+            const coletas = obterColetasDeduplicadas();
+            if (coletas.length === 0) return [];
             
             const playerUltimoRegistro = {};
-            dbColetas.forEach(r => {
-                if (!playerUltimoRegistro[r.nome] || r.data > playerUltimoRegistro[r.nome].data) {
+            coletas.forEach(r => {
+                if (!playerUltimoRegistro[r.nome] || r.data >= playerUltimoRegistro[r.nome].data) {
                     playerUltimoRegistro[r.nome] = r;
                 }
             });
@@ -912,7 +898,6 @@
             return Object.values(playerUltimoRegistro);
         }
 
-        // Determinar Quadrante de um jogador com base em seu poder/doação comparado à média
         function calcularQuadrante(poder, doacao, mediaPoder, mediaDoacao) {
             poder = Number(poder);
             doacao = Number(doacao);
@@ -931,24 +916,24 @@
 
         // ================= RENDERIZAÇÕES DO DASHBOARD =================
         function recalcularPainelEstatistico() {
+            const coletas = obterColetasDeduplicadas();
             const dataRecenteAtivos = obterDataMaisRecenteGlobal();
             
-            // Exibir a data do filtro no topo
             const spanDataAuditoria = document.getElementById('span-auditoria-data');
             if (spanDataAuditoria) {
                 spanDataAuditoria.innerText = dataRecenteAtivos ? formatarData(dataRecenteAtivos) : "Nenhum registo ativo";
             }
 
-            // Jogadores ativos (ON) na auditoria mais recente (não demitidos manualmente e cuja última coleta é a atual global)
             const todosPanorama = obterMembrosNoPanoramaAtual();
-            const ativosAuditoriaRecente = dbColetas.filter(r => {
+            
+            // Filtra os ativos da última auditoria a partir da lista deduplicada
+            const ativosAuditoriaRecente = coletas.filter(r => {
                 const status = processarMembroStatus(r.nome, r);
                 return status.ativo && r.data === dataRecenteAtivos;
             });
 
             const totalAtivos = ativosAuditoriaRecente.length;
 
-            // Variáveis de métricas
             let mediaPoder = 0;
             let mediaDoacao = 0;
             let notaCorte = 0;
@@ -966,7 +951,6 @@
                 pctCumpremCorte = Math.round((cumpremCorte / totalAtivos) * 100);
             }
 
-            // Preenche cards de forma segura
             const mediaPoderCard = document.getElementById('metric-media-poder');
             if (mediaPoderCard) mediaPoderCard.innerText = formatarNumero(mediaPoder);
 
@@ -979,7 +963,7 @@
             const cumpremCorteCard = document.getElementById('metric-cumprem-corte');
             if (cumpremCorteCard) cumpremCorteCard.innerText = `${pctCumpremCorte}%`;
 
-            // Conta total de membros no panorama atual
+            // Total de combatentes ativos em toda a corporação
             const totalAtivosGerais = todosPanorama.filter(m => {
                 const status = processarMembroStatus(m.nome, m);
                 return status.ativo;
@@ -991,11 +975,10 @@
             const ativosOnCard = document.getElementById('metric-ativos-on');
             if (ativosOnCard) ativosOnCard.innerText = `${totalAtivos} / ${totalAtivosGerais}`;
 
-            // Atualiza spans flutuantes do corte nas explicações
             const corteSpans = document.querySelectorAll('.corte-span');
             corteSpans.forEach(s => s.innerText = formatarNumero(notaCorte));
 
-            // Filtrar e preencher Listagens dos Quadrantes para Membros ON da auditoria recente
+            // Listas dos Quadrantes baseadas unicamente na auditoria mais recente
             const listas = {
                 1: { id: "list-alta-performance", countId: "quad-alta-count", html: "" },
                 2: { id: "list-potencial-crescimento", countId: "quad-potencial-count", html: "" },
@@ -1005,7 +988,6 @@
 
             const contadores = { 1: 0, 2: 0, 3: 0, 4: 0 };
 
-            // Classifica apenas os elementos pertencentes à auditoria recente dos ativos
             ativosAuditoriaRecente.forEach(m => {
                 const quad = calcularQuadrante(m.poder, m.doacao, mediaPoder, mediaDoacao);
                 contadores[quad.num]++;
@@ -1024,7 +1006,6 @@
                 `;
             });
 
-            // Atualiza o DOM dos quadrantes de forma segura
             Object.keys(listas).forEach(num => {
                 const countEl = document.getElementById(listas[num].countId);
                 if (countEl) countEl.innerText = contadores[num];
@@ -1032,14 +1013,14 @@
                 const listEl = document.getElementById(listas[num].id);
                 if (listEl) {
                     if (listas[num].html === "") {
-                        listEl.innerHTML = `<p class="text-slate-600 italic text-center py-4 text-xs">Nenhum guerreiro ativo registado na última auditoria.</p>`;
+                        listEl.innerHTML = `<p class="text-slate-600 italic text-center py-4 text-xs">Nenhum guerreiro ativo registrado na última auditoria.</p>`;
                     } else {
                         listEl.innerHTML = listas[num].html;
                     }
                 }
             });
 
-            // Alerta de Inatividade: Aplica-se aos membros ativos em geral que possuem tempo offline
+            // Alerta de Inatividade atualizado
             const inativos = todosPanorama.filter(m => {
                 const status = processarMembroStatus(m.nome, m);
                 return status.ativo && Number(m.offline) >= 1;
@@ -1076,7 +1057,7 @@
         }
 
 
-        // ================= TABELA DETALHADA =================
+        // ================= TABELA DETALHADA (HISTÓRICO SEM REPETIÇÕES) =================
         function renderDatabaseTable() {
             const queryInput = document.getElementById('db-search');
             const query = queryInput ? queryInput.value.toLowerCase() : "";
@@ -1089,8 +1070,10 @@
             
             tbody.innerHTML = "";
 
+            const coletas = obterColetasDeduplicadas();
             const dataRecenteAtivos = obterDataMaisRecenteGlobal();
-            const ativosAuditoriaRecente = dbColetas.filter(r => {
+            
+            const ativosAuditoriaRecente = coletas.filter(r => {
                 const status = processarMembroStatus(r.nome, r);
                 return status.ativo && r.data === dataRecenteAtivos;
             });
@@ -1106,12 +1089,9 @@
                 mediaDoacao = Math.round(somaDoacao / totalAtivos);
             }
 
-            // Filtros aplicados na base completa de coletas
-            let registrosFiltrados = dbColetas.filter(r => {
+            let registrosFiltrados = coletas.filter(r => {
                 const matchesSearch = r.nome.toLowerCase().includes(query) || r.rank.toLowerCase().includes(query);
                 
-                // Mapear se este registro em específico pertence a um jogador ativo no momento
-                // Nota: o status ativo/demitido é do jogador (no panorama mais atual), não do registro isolado.
                 const jogadorNoPanorama = obterMembrosNoPanoramaAtual().find(p => p.nome === r.nome);
                 const statusJogador = jogadorNoPanorama ? processarMembroStatus(r.nome, jogadorNoPanorama) : { ativo: true };
 
@@ -1125,12 +1105,11 @@
                 return matchesSearch && matchesStatus;
             });
 
-            // Ordena os registros por data de coleta descendente
             registrosFiltrados.sort((a,b) => b.data.localeCompare(a.data));
 
             const dbTableInfo = document.getElementById('db-table-info');
             if (dbTableInfo) {
-                dbTableInfo.innerText = `Mostrando ${registrosFiltrados.length} registos de ${dbColetas.length}`;
+                dbTableInfo.innerText = `Mostrando ${registrosFiltrados.length} registos de ${coletas.length}`;
             }
 
             if (registrosFiltrados.length === 0) {
@@ -1145,7 +1124,6 @@
             }
 
             registrosFiltrados.forEach(r => {
-                // Classificação utiliza os valores dinâmicos globais ativos do dia recente
                 const quad = calcularQuadrante(r.poder, r.doacao, mediaPoder, mediaDoacao);
                 
                 let rowBgStyle = "hover:bg-slate-900/40 transition-colors";
@@ -1162,11 +1140,9 @@
                     rowBgStyle += " bg-rose-950/10";
                 }
 
-                // Obtém o panorama do jogador para descobrir se ele está demitido atualmente
                 const jogadorNoPanorama = obterMembrosNoPanoramaAtual().find(p => p.nome === r.nome);
                 const statusMembro = jogadorNoPanorama ? processarMembroStatus(r.nome, jogadorNoPanorama) : { ativo: true, dataDemissao: "" };
 
-                // Renderiza botões de ação se o usuário for Admin, senão exibe um ícone de cadeado
                 let botoesAcaoHtml = "";
                 if (isAdmin) {
                     botoesAcaoHtml = `
@@ -1185,7 +1161,6 @@
                     `;
                 }
 
-                // String informativa sobre a saída
                 let infoDemissaoHtml = "";
                 if (!statusMembro.ativo) {
                     const tipoTexto = statusMembro.metodo === 'auto' ? "Auto" : "Manual";
@@ -1227,39 +1202,50 @@
         }
 
 
-        // ================= ATIVIDADE INDIVIDUAL (FICHA CUMULATIVA) =================
+        // ================= ATIVIDADE INDIVIDUAL (FICHA CUMULATIVA CORRIGIDA) =================
         function renderAtividadeIndividual() {
             const tbody = document.getElementById('individual-table-body');
             if (!tbody) return;
             
             tbody.innerHTML = "";
 
-            if (dbColetas.length === 0) {
+            const coletas = obterColetasDeduplicadas();
+
+            if (coletas.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-500 italic">Nenhum dado cadastrado.</td></tr>`;
                 return;
             }
 
-            const dataRecenteAtivos = obterDataMaisRecenteGlobal();
-            const ativosAuditoriaRecente = dbColetas.filter(r => {
-                const status = processarMembroStatus(r.nome, r);
-                return status.ativo && r.data === dataRecenteAtivos;
+            // --- PASSO 1: CALCULAR AS MÉDIAS HISTÓRICAS DE CADA DATA ---
+            // Mapeia data -> { mediaPoder, mediaDoacao } para classificar corretamente cada aparição individual no tempo
+            const mediasPorData = {};
+            const datasUnicas = [...new Set(coletas.map(c => c.data))];
+
+            datasUnicas.forEach(data => {
+                const registrosDaData = coletas.filter(c => c.data === data);
+                // Considera apenas quem estava Ativo na data correspondente (offline < 24 dias ou outro filtro)
+                const ativosDaData = registrosDaData.filter(r => {
+                    const status = processarMembroStatus(r.nome, r);
+                    // Para fins de cálculo de médias históricas de corte, consideramos se ele estava ativo no momento da coleta
+                    return r.offline < 7 && !r.demissao;
+                });
+
+                const totalAtivos = ativosDaData.length || registrosDaData.length; // Fallback se ninguém for ativo
+                const alvosParaMedia = ativosDaData.length > 0 ? ativosDaData : registrosDaData;
+
+                const somaPoder = alvosParaMedia.reduce((acc, curr) => acc + Number(curr.poder), 0);
+                const somaDoacao = alvosParaMedia.reduce((acc, curr) => acc + Number(curr.doacao), 0);
+
+                mediasPorData[data] = {
+                    mediaPoder: Math.round(somaPoder / totalAtivos),
+                    mediaDoacao: Math.round(somaDoacao / totalAtivos)
+                };
             });
-            const totalAtivos = ativosAuditoriaRecente.length;
 
-            let mediaPoder = 0;
-            let mediaDoacao = 0;
-
-            if (totalAtivos > 0) {
-                const somaPoder = ativosAuditoriaRecente.reduce((acc, curr) => acc + Number(curr.poder), 0);
-                const somaDoacao = ativosAuditoriaRecente.reduce((acc, curr) => acc + Number(curr.doacao), 0);
-                mediaPoder = Math.round(somaPoder / totalAtivos);
-                mediaDoacao = Math.round(somaDoacao / totalAtivos);
-            }
-
-            // Agrupa e conta aparições históricas por jogador (Preservando todo o histórico completo!)
+            // --- PASSO 2: CONSTRUIR FICHA ACUMULADA DO HISTÓRICO ---
             const fichaPlayers = {};
 
-            dbColetas.forEach(r => {
+            coletas.forEach(r => {
                 const nome = r.nome;
                 if (!fichaPlayers[nome]) {
                     fichaPlayers[nome] = {
@@ -1273,12 +1259,21 @@
                     };
                 }
 
+                // Identifica o último snapshot temporal para herdar dados de rank e status atual
                 if (r.data > fichaPlayers[nome].ultimoRegistro.data) {
                     fichaPlayers[nome].ultimoRegistro = r;
                 }
 
-                // A classificação das aparições históricas também é baseada na régua atualizada
-                const quad = calcularQuadrante(r.poder, r.doacao, mediaPoder, mediaDoacao);
+                // Resgata a média tática do dia em que a coleta foi registrada
+                const metasDoDia = mediasPorData[r.data];
+                const quad = calcularQuadrante(
+                    r.poder, 
+                    r.doacao, 
+                    metasDoDia ? metasDoDia.mediaPoder : r.poder, 
+                    metasDoDia ? metasDoDia.mediaDoacao : r.doacao
+                );
+
+                // Incrementa cumulativamente a aparição do jogador naquele quadrante
                 fichaPlayers[nome][`quad${quad.num}`]++;
                 fichaPlayers[nome].totalColetas++;
             });
@@ -1301,7 +1296,6 @@
                     `;
                 }
 
-                // Renderiza botão se for admin, caso contrário renderiza travado/desativado
                 let botaoStatusHtml = "";
                 if (isAdmin) {
                     botaoStatusHtml = `
@@ -1319,12 +1313,23 @@
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-900/30 transition-all">
-                        <td class="p-4 font-bold text-slate-200 text-sm">${f.nome}</td>
-                        <td class="p-4 text-center font-mono font-bold bg-emerald-950/10 text-emerald-300">${f.quad1}</td>
-                        <td class="p-4 text-center font-mono font-bold bg-blue-950/10 text-blue-300">${f.quad2}</td>
-                        <td class="p-4 text-center font-mono font-bold bg-amber-950/10 text-amber-300">${f.quad3}</td>
-                        <td class="p-4 text-center font-mono font-bold bg-rose-950/10 text-rose-300">${f.quad4}</td>
-                        <td class="p-4 text-center font-mono">${f.totalColetas}</td>
+                        <td class="p-4 font-bold text-slate-200 text-sm">
+                            ${f.nome}
+                            <span class="text-[10px] text-slate-500 font-normal ml-2">(${f.ultimoRegistro.rank})</span>
+                        </td>
+                        <td class="p-4 text-center font-mono font-bold bg-emerald-950/10 text-emerald-300">
+                            ${f.quad1} <span class="text-[10px] text-slate-500 font-normal block">vezes</span>
+                        </td>
+                        <td class="p-4 text-center font-mono font-bold bg-blue-950/10 text-blue-300">
+                            ${f.quad2} <span class="text-[10px] text-slate-500 font-normal block">vezes</span>
+                        </td>
+                        <td class="p-4 text-center font-mono font-bold bg-amber-950/10 text-amber-300">
+                            ${f.quad3} <span class="text-[10px] text-slate-500 font-normal block">vezes</span>
+                        </td>
+                        <td class="p-4 text-center font-mono font-bold bg-rose-950/10 text-rose-300">
+                            ${f.quad4} <span class="text-[10px] text-slate-500 font-normal block">vezes</span>
+                        </td>
+                        <td class="p-4 text-center font-mono font-bold text-slate-300">${f.totalColetas}</td>
                         <td class="p-4 text-center">${statusBadge}</td>
                         <td class="p-4 text-center whitespace-nowrap">
                             ${botaoStatusHtml}
@@ -1334,7 +1339,6 @@
             });
         }
 
-        // Alterna rapidamente o status de admissão ou demissão de um jogador (forçar status manualmente)
         function alternarStatusFicha(nome) {
             if (!isAdmin) {
                 showToast("Acesso Negado: Ative o Modo de Edição primeiro!");
@@ -1353,16 +1357,13 @@
                 const statusAtual = processarMembroStatus(nome, maisRecente);
                 
                 if (!statusAtual.ativo) {
-                    // Se estava marcado como demitido, limpa a demissão manual e recoloca no ciclo ativo global
                     maisRecente.demissao = "";
-                    // Se o seu registro mais recente era de um ciclo antigo, trazemos ele para o ciclo atual
                     const dataMaisRecenteGlobal = obterDataMaisRecenteGlobal();
                     if (maisRecente.data < dataMaisRecenteGlobal) {
                         maisRecente.data = dataMaisRecenteGlobal;
                     }
                     showToast(`${nome} foi readmitido e marcado como Ativo (ON)!`);
                 } else {
-                    // Se estava ativo, fixa manualmente a data de demissão como a data de sua última coleta
                     maisRecente.demissao = maisRecente.data;
                     showToast(`${nome} marcado como inativo/demitido manualmente.`);
                 }
@@ -1480,7 +1481,6 @@
             toggleDeleteModal(true);
         }
 
-        // Modal Customizado (Elimina alertas do navegador)
         function toggleDeleteModal(show) {
             const modal = document.getElementById('modal-confirm-delete');
             if (modal) {
@@ -1625,10 +1625,8 @@
                 return;
             }
 
-            // Ordena eventos por data (mais antigos para mais recentes ou vice-versa)
             const eventosOrdenados = [...dbEventos].sort((a,b) => b.horario.localeCompare(a.horario));
 
-            // Obtém combatentes ativos na corporação hoje
             const combatentesAtivos = obterMembrosNoPanoramaAtual().filter(m => {
                 const status = processarMembroStatus(m.nome, m);
                 return status.ativo;
@@ -1639,12 +1637,10 @@
                 const totalPresentes = combatentesAtivos.filter(m => evt.presencas.includes(m.nome)).length;
                 const percentual = totalMembros > 0 ? Math.round((totalPresentes / totalMembros) * 100) : 0;
 
-                // Formatar data do evento de forma legível
                 const dataFormatada = new Date(evt.horario).toLocaleString('pt-PT', {
                     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
 
-                // Botão de deletar visível/habilitado apenas para Admins
                 let deleteBtnHtml = "";
                 if (isAdmin) {
                     deleteBtnHtml = `
@@ -1668,7 +1664,6 @@
                             icon = '<i class="fa-solid fa-circle-check text-green-400 mr-1.5"></i>';
                         }
 
-                        // O clique chama alternarPresenca e altera a UI em tempo real
                         combatentesHtml += `
                             <button onclick="alternarPresenca('${evt.id}', '${m.nome}')" class="flex items-center text-left py-2 px-3 border rounded-lg text-xs transition-all ${badgeStyle}">
                                 ${icon}
